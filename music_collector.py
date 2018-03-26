@@ -6,8 +6,10 @@ MUSIC_FILE_DIR = 'music_files'
 
 def main():
   chart = cc.getMelonChart()
+#  print(chart)
   for song in chart:
-    ye.getSongFromYouTube(song.artist, song.title, song.songID, song.lyric, song.albumInfo)
+    print(song)
+    ye.getSongFromYouTube(song['artist'], song['title'], song['songID'], song['lyric'], song['albumInfo'])
 
 if __name__ == '__main__':
   main()

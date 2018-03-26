@@ -98,7 +98,7 @@ def getMelonChart():
                          'songID':songID, 'lyric':lyric, 'albumInfo':albumInfo})
 #      print(lyric)
       count += 1
-      if count > 2:
+      if count > 50:
         break
   return chart_list
 

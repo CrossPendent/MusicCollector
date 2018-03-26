@@ -24,13 +24,14 @@ def find_youtube(query):
     watch_urls.append(base_url + link.find('a').attrs['href'])
   return watch_urls
 
-def download_audio_from_youtube(url, output_path, filename):
+def download_audio_from_youtube(url, output_dir, filename):
   yt = YouTube(url)
   audio_list = yt.streams.filter(only_audio=True).all()
-  if not os.path.exists(output_path):
-    os.mkdir(output_path)
-#  audio_list[0].download(output_path, filename)
-  return os.path.join(output_path, filename+'.mp4')
+  if not os.path.exists(output_dir):
+    os.mkdir(output_dir)
+  if not os.path.exists(os.path.join(output_dir, filename+'.mp3')):
+    audio_list[0].download(output_dir, filename)
+  return os.path.join(output_dir, filename + '.mp4')
 
 def setID3(file_path, artist, title, lyric, albumInfo, cover_img_path):
   audio_file = MP3(file_path, ID3=ID3)
@@ -82,50 +83,51 @@ def setID3(file_path, artist, title, lyric, albumInfo, cover_img_path):
       text=[artist]
     )
   )
-  audio_file.tags.add(
-    TPRO(
-      encoding=encoding,
-      text=[albumInfo['copyright']]
+  if not albumInfo == None:
+    audio_file.tags.add(
+      TPRO(
+        encoding=encoding,
+        text=[albumInfo['copyright']]
+      )
     )
-  )
-  audio_file.tags.add(
-    TCON(
-      encoding=encoding,
-      text=[albumInfo['genre']]
+    audio_file.tags.add(
+      TCON(
+        encoding=encoding,
+        text=[albumInfo['genre']]
+      )
     )
-  )
-  audio_file.tags.add(
-    TPUB(
-      encoding=encoding,
-      text=[albumInfo['publisher']]
+    audio_file.tags.add(
+      TPUB(
+        encoding=encoding,
+        text=[albumInfo['publisher']]
+      )
     )
-  )
-  audio_file.tags.add(
-    TDOR(
-      encoding=encoding,
-      text=[albumInfo['pub_date']]
+    audio_file.tags.add(
+      TDOR(
+        encoding=encoding,
+        text=[albumInfo['pub_date']]
+      )
     )
-  )
-  audio_file.tags.add(
-    TDRL(
-      encoding=encoding,
-      text=[albumInfo['pub_date']]
+    audio_file.tags.add(
+      TDRL(
+        encoding=encoding,
+        text=[albumInfo['pub_date']]
+      )
     )
-  )
-
   audio_file.save()
 
 def convertMP3(old_file_path):
   mp3_path = old_file_path.replace('.mp4', '.mp3')
-#  subprocess.call(['ffmpeg', '-i', old_file_path, mp3_path])
-#  os.remove(old_file_path)
+  if not os.path.exists(mp3_path):
+    subprocess.call(['ffmpeg', '-i', old_file_path, mp3_path])
+    os.remove(old_file_path)
   return mp3_path
 
 def getSongFromYouTube(artist, title, songID, lyric, albumInfo):
   query = '{}-{}'.format(artist, title)
   list = find_youtube(query)
   print('\'' + query + '\' is downloading.')
-  file_path = download_audio_from_youtube(list[0], mc.MUSIC_FILE_DIR, query)
+  file_path = download_audio_from_youtube(list[0], mc.MUSIC_FILE_DIR, query.replace('.', ''))
   print('\'' + file_path + '\' was downloaded.')
   print('\'' + file_path + '\' is converting...')
   new_file_path = convertMP3(file_path)
