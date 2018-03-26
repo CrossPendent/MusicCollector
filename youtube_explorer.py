@@ -9,7 +9,7 @@ import urllib.parse
 from pytube import YouTube
 
 from mutagen.mp3 import MP3
-from mutagen.id3 import ID3, APIC, USLT, TOPE, TIT1, TIT2, TPE1, TIPL
+from mutagen.id3 import ID3, APIC, USLT, TOPE, TIT1, TIT2, TPE1, TIPL, TPRO, TCON, TPUB, TDOR, TDRL
 
 def find_youtube(query):
   base_url = 'https://www.youtube.co.kr'
@@ -32,7 +32,7 @@ def download_audio_from_youtube(url, output_path, filename):
 #  audio_list[0].download(output_path, filename)
   return os.path.join(output_path, filename+'.mp4')
 
-def setID3(file_path, artist, title, lyric, cover_img_path):
+def setID3(file_path, artist, title, lyric, albumInfo, cover_img_path):
   audio_file = MP3(file_path, ID3=ID3)
   encoding=3   # 3 is for utf-8
   # add CoverPicture
@@ -82,6 +82,36 @@ def setID3(file_path, artist, title, lyric, cover_img_path):
       text=[artist]
     )
   )
+  audio_file.tags.add(
+    TPRO(
+      encoding=encoding,
+      text=[albumInfo['copyright']]
+    )
+  )
+  audio_file.tags.add(
+    TCON(
+      encoding=encoding,
+      text=[albumInfo['genre']]
+    )
+  )
+  audio_file.tags.add(
+    TPUB(
+      encoding=encoding,
+      text=[albumInfo['publisher']]
+    )
+  )
+  audio_file.tags.add(
+    TDOR(
+      encoding=encoding,
+      text=[albumInfo['pub_date']]
+    )
+  )
+  audio_file.tags.add(
+    TDRL(
+      encoding=encoding,
+      text=[albumInfo['pub_date']]
+    )
+  )
 
   audio_file.save()
 
@@ -91,7 +121,7 @@ def convertMP3(old_file_path):
 #  os.remove(old_file_path)
   return mp3_path
 
-def getSongFromYouTube(artist, title, songID, lyric):
+def getSongFromYouTube(artist, title, songID, lyric, albumInfo):
   query = '{}-{}'.format(artist, title)
   list = find_youtube(query)
   print('\'' + query + '\' is downloading.')
@@ -100,7 +130,7 @@ def getSongFromYouTube(artist, title, songID, lyric):
   print('\'' + file_path + '\' is converting...')
   new_file_path = convertMP3(file_path)
   print('\'' + new_file_path + '\' was converted.')
-  setID3(new_file_path, artist, title, lyric, os.path.join(mc.IMAGE_DIR, songID+'.jpg'))
+  setID3(new_file_path, artist, title, lyric, albumInfo, os.path.join(mc.IMAGE_DIR, songID+'.jpg'))
   print('Song Information was recorded on \'' + new_file_path + '\'')
 
 if __name__ == '__main__':

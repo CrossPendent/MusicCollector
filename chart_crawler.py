@@ -34,6 +34,8 @@ def getLyricFromMelon(melon_songID):
   return lyric
 
 def getAlbumInfoFromMelon(melon_albumID):
+  if melon_albumID == None:
+    return None
   base_url = 'http://www.melon.com/album/detail.htm?albumId='
   url = base_url + melon_albumID
 
@@ -44,6 +46,8 @@ def getAlbumInfoFromMelon(melon_albumID):
 
   soup = BeautifulSoup(content, "html.parser")
   info = soup.find('dl', {'class':'list'})
+  if info == None:
+    return None
   dd_list = info.find_all('dd')
 
   pub_date = dd_list[0].contents[0]
@@ -80,7 +84,7 @@ def getMelonChart():
   print(period.find('span').contents[0].replace('\r\n\t\t\t\t\t\t', '').replace('\t', ''))
 
   table = soup.find(style='width:100%')
-  print(table)
+#  print(table)
   print('')
   count = 1
   chart_list = []
