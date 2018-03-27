@@ -2,6 +2,7 @@ import music_collector as mc
 
 import urllib.request
 import os
+import time
 from bs4 import BeautifulSoup
 
 def getHTMLContents(url):
@@ -10,8 +11,10 @@ def getHTMLContents(url):
                'Mozilla/5.0 (Windows NT 5.1; rv:6.0.2) Gecko/20100101 Firefox/6.0.2',
                'Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1)',
                ]
+  retryDelay = [0.1, 0.5, 1, 2, 5, 10, 30, 60, 300]
   conLoop = True
   agentCount = 0
+  delayCount = 0
   while(conLoop):
     opener = urllib.request.build_opener()
     opener.addheaders = [('Accept', 'text/html, application/xhtml+xml, */*'),
@@ -20,14 +23,15 @@ def getHTMLContents(url):
                          ('Host', 'www.melon.com'),
                          ('DNT', '1'),
                          ('Connection', 'Keep-Alive'),
-#                         ('Cookie', 'SCOUTER=x6egm4o94vamt9; PCID=14617299907316145182456; POC=WP10'),
                          ("Content-Type", "application/x-www-form-urlencoded;charset=utf-8")]
     try:
       html = opener.open(url)
     except ConnectionResetError as e:
       print('Connection denied from \'{}\''.format(url))
-      print('Try again using another header...')
+      print('Try again using another header after {}sec...'.format(retryDelay[delayCount]))
       agentCount = (agentCount+1) % len(listAgent)
+      time.sleep(retryDelay[delayCount])
+      delayCount = (delayCount+1) % len(retryDelay)
     else:
       conLoop = False
   return html.read()
@@ -91,10 +95,14 @@ def getSongInfoOfMelon(music_record):
 
   print('=========')
   print('soupArtist')
-  artist = []
+  artist = ''
 #  print(soupArtist)
+  artistCount = 0
   for art in soupArtist.find('span', {'class':'checkEllipsis'}).find_all('a'):
-    artist.append(art.contents[0])
+    if artistCount > 0:
+      artist += ','
+    artist += art.contents[0]
+    artistCount += 1
   print(artist)
   print('soupTitle')
 #  print(soupTitle)
@@ -155,7 +163,7 @@ def getMelonChart():
                          'songID':songID, 'albumInfo':albumInfo, 'lyric':lyric})
 #      print(lyric)
       count += 1
-      if count > 50:
+      if count > 20:
         break
   return chart_list
 

@@ -9,7 +9,19 @@ import urllib.parse
 from pytube import YouTube
 
 from mutagen.mp3 import MP3
-from mutagen.id3 import ID3, APIC, USLT, TOPE, TIT1, TIT2, TPE1, TIPL, TPRO, TCON, TPUB, TDOR, TDRL
+from mutagen.id3 import ID3, APIC, USLT, TOPE, TIT1, TIT2, TPE1, TIPL, TPRO, TCON, TPUB, TDOR, TDRL, TALB
+
+def convertQueryToFilename(strQuery):
+  listTargetKeys = ['\"', '#', '$', '%', '\'', '*', ',', '.', '/', ':', '"',
+                    ';', '<', '>', '?', '\\', '^', '|', '~', '\\\\',]
+  '''
+  listTargetKeys = ['~', '`', '!', '@', '#', '$', '%', '^', '&', '*', '+', '=', '|',
+                    '\\', '"', '\'', ':', ';', '?', '/', '<', '>', ',', '.']
+  '''
+  strFileName = strQuery
+  for letter in listTargetKeys:
+    strFileName = strFileName.replace(letter, '')
+  return strFileName
 
 def find_youtube(query):
   base_url = 'https://www.youtube.co.kr'
@@ -24,7 +36,8 @@ def find_youtube(query):
     watch_urls.append(base_url + link.find('a').attrs['href'])
   return watch_urls
 
-def download_audio_from_youtube(url, output_dir, filename):
+def download_audio_from_youtube(url, output_dir, strQuery):
+  filename = convertQueryToFilename(strQuery)
   yt = YouTube(url)
   audio_list = yt.streams.filter(only_audio=True).all()
   if not os.path.exists(output_dir):
@@ -85,6 +98,12 @@ def setID3(file_path, artist, title, lyric, albumInfo, cover_img_path):
   )
   if not albumInfo == None:
     audio_file.tags.add(
+      TALB(
+        encoding=encoding,
+        text=[albumInfo['album_name']]
+      )
+    )
+    audio_file.tags.add(
       TPRO(
         encoding=encoding,
         text=[albumInfo['copyright']]
@@ -127,7 +146,7 @@ def getSongFromYouTube(artist, title, songID, lyric, albumInfo):
   query = '{}-{}'.format(artist, title)
   list = find_youtube(query)
   print('\'' + query + '\' is downloading.')
-  file_path = download_audio_from_youtube(list[0], mc.MUSIC_FILE_DIR, query.replace('.', ''))
+  file_path = download_audio_from_youtube(list[0], mc.MUSIC_FILE_DIR, query)
   print('\'' + file_path + '\' was downloaded.')
   print('\'' + file_path + '\' is converting...')
   new_file_path = convertMP3(file_path)
