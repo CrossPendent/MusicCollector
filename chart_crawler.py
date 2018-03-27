@@ -4,6 +4,34 @@ import urllib.request
 import os
 from bs4 import BeautifulSoup
 
+def getHTMLContents(url):
+  listAgent = ['Mozilla/5.0 (Windows NT 6.3; WOW64; Trident/7.0; rv:11.0) like Gecko',
+               'Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3325.181 Safari/537.36',
+               'Mozilla/5.0 (Windows NT 5.1; rv:6.0.2) Gecko/20100101 Firefox/6.0.2',
+               'Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1)',
+               ]
+  conLoop = True
+  agentCount = 0
+  while(conLoop):
+    opener = urllib.request.build_opener()
+    opener.addheaders = [('Accept', 'text/html, application/xhtml+xml, */*'),
+                         ('Accept-Language', 'ko-KR'),
+                         ('User_agent', listAgent[agentCount]),
+                         ('Host', 'www.melon.com'),
+                         ('DNT', '1'),
+                         ('Connection', 'Keep-Alive'),
+#                         ('Cookie', 'SCOUTER=x6egm4o94vamt9; PCID=14617299907316145182456; POC=WP10'),
+                         ("Content-Type", "application/x-www-form-urlencoded;charset=utf-8")]
+    try:
+      html = opener.open(url)
+    except ConnectionResetError as e:
+      print('Connection denied from \'{}\''.format(url))
+      print('Try again using another header...')
+      agentCount = (agentCount+1) % len(listAgent)
+    else:
+      conLoop = False
+  return html.read()
+
 def downloadImageFromMelon(url, songID):
   image_dir = mc.IMAGE_DIR
   if not os.path.exists(image_dir):
@@ -15,10 +43,8 @@ def downloadImageFromMelon(url, songID):
 def getLyricFromMelon(melon_songID):
   base_url = 'http://www.melon.com/song/detail.htm?songId='
   url = base_url + melon_songID;
-  opener = urllib.request.build_opener()
-  opener.addheaders = [('User_agent', 'Mozilla/5.0')]
-  html = opener.open(url)
-  content = html.read()
+
+  content = getHTMLContents(url)
 
   soup = BeautifulSoup(content, "html.parser")
   raw_lyric = soup.find('div', {'class':'lyric'}).contents[1:]
@@ -39,12 +65,13 @@ def getAlbumInfoFromMelon(melon_albumID):
   base_url = 'http://www.melon.com/album/detail.htm?albumId='
   url = base_url + melon_albumID
 
-  opener = urllib.request.build_opener()
-  opener.addheaders = [('User_agent', 'Mozilla/5.0')]
-  html = opener.open(url)
-  content = html.read()
+  content = getHTMLContents(url)
 
   soup = BeautifulSoup(content, "html.parser")
+  soupAlbumName = soup.find('div', {'class':'song_name'})
+  albumName = soupAlbumName.contents[-1].replace('\r\n\t\t\t\t\t\t\t\t\t', '').replace('\t', '')
+  print(albumName)
+
   info = soup.find('dl', {'class':'list'})
   if info == None:
     return None
@@ -54,16 +81,46 @@ def getAlbumInfoFromMelon(melon_albumID):
   genre = dd_list[1].contents[0]
   publisher = dd_list[2].contents[0]
   copyright = dd_list[3].contents[0]
-  return {'pub_date':pub_date, 'genre':genre, 'publisher':publisher, 'copyright':copyright}
+  return {'album_name':albumName, 'pub_date':pub_date, 'genre':genre, 'publisher':publisher, 'copyright':copyright}
 
 def getSongInfoOfMelon(music_record):
+  soupArtist = music_record.find('div', {'class':'ellipsis rank02'})
+  soupTitle = music_record.find('div', {'class':'ellipsis rank01'})
+  soupSongInfo = music_record.find('a', {'class':'btn button_icons type03 song_info'})
+  soupAlbumInfo = music_record.find('div', {'class':'ellipsis rank03'})
+
+  print('=========')
+  print('soupArtist')
+  artist = []
+#  print(soupArtist)
+  for art in soupArtist.find('span', {'class':'checkEllipsis'}).find_all('a'):
+    artist.append(art.contents[0])
+  print(artist)
+  print('soupTitle')
+#  print(soupTitle)
+  title = soupTitle.find('a').contents[0]
+  print(title)
+  print('soupSongInfo')
+#  print(soupSongInfo)
+  songID = soupSongInfo['href'].replace('javascript:melon.link.goSongDetail(\'', '').replace('\');', '')
+  print(songID)
+  print('soupAlbumInfo')
+#  print(soupAlbumInfo)
+  albumID = soupAlbumInfo.find('a')['href'].replace('javascript:melon.link.goAlbumDetail(\'', '').replace('\');', '')
+  print(albumID)
+  '''
   links = music_record.find_all('a')
   if len(links) < 4:
     return None
   artist = links[3].contents[0]
   title = links[2].contents[0]
-  songID = links[1]['href'].replace('javascript:melon.link.goSongDetail(\'','').replace('\');', '')
-  albumID = links[4]['href'].replace('javascript:melon.link.goAlbumDetail(\'','').replace('\');', '')
+  songID = links[1]['href'].replace('javascript:melon.link.goSongDetail(\'', '').replace('\');', '')
+  albumID = links[5]['href'].replace('javascript:melon.link.goAlbumDetail(\'', '').replace('\');', '')
+  if len(albumID) > 10:
+    for link in links:
+      print(link)
+  print(albumID)
+  '''
   albumInfo = getAlbumInfoFromMelon(albumID)
 
   image = music_record.find('img')
@@ -75,10 +132,7 @@ def getSongInfoOfMelon(music_record):
 
 def getMelonChart():
   url = "http://www.melon.com/chart/week/"
-  opener = urllib.request.build_opener()
-  opener.addheaders = [('User_agent', 'Mozilla/5.0')]
-  html = opener.open(url)
-  content = html.read()
+  content = getHTMLContents(url)
 #  print(content)
 
   soup = BeautifulSoup(content, "html.parser")
@@ -98,7 +152,7 @@ def getMelonChart():
       artist , title, songID, coverImgFile, lyric, albumInfo = getSongInfoOfMelon(music)
       print('{:02}. {} - {} (id:{}, {})'.format(count, artist, title, songID, coverImgFile))
       chart_list.append({'rank':count, 'artist':artist, 'title':title,
-                         'songID':songID, 'lyric':lyric, 'albumInfo':albumInfo})
+                         'songID':songID, 'albumInfo':albumInfo, 'lyric':lyric})
 #      print(lyric)
       count += 1
       if count > 50:
@@ -106,4 +160,6 @@ def getMelonChart():
   return chart_list
 
 if __name__ == '__main__':
-  getMelonChart()
+  chartlist = getMelonChart()
+  for song in chartlist:
+    print(song)

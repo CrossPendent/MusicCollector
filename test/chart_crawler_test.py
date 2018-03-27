@@ -4,6 +4,7 @@ from bs4 import BeautifulSoup
 import test.test_variables as testvar
 
 class ChartCrawlerTest(unittest.TestCase):
+  '''
   def testGetAlbumInfoFromMelon(self):
     albumInfo = cc.getAlbumInfoFromMelon('10147314')
     self.assertIsNotNone(albumInfo)
@@ -11,7 +12,7 @@ class ChartCrawlerTest(unittest.TestCase):
     albumInfo = cc.getAlbumInfoFromMelon('10145303')
     self.assertIsNotNone(albumInfo)
     print(albumInfo)
-
+  '''
   def testGetSongInfoOfMelon(self):
     soup = BeautifulSoup(testvar.html_rank_page, 'html.parser')
     table = soup.find(style='width:100%')
@@ -22,12 +23,13 @@ class ChartCrawlerTest(unittest.TestCase):
         self.assertIsNone(songInfo)
       else:
         self.assertIsNotNone(songInfo)
-      print(songInfo)
+#      print(songInfo)
       count += 1
 
   def testGetMelonChart(self):
-    cc.getMelonChart()
-    pass
+    listChart = cc.getMelonChart()
+    for song in listChart:
+      print(song['albumInfo'])
 
 if __name__ == '__main__':
   unittest.main()
