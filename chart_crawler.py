@@ -58,6 +58,8 @@ def getAlbumInfoFromMelon(melon_albumID):
 
 def getSongInfoOfMelon(music_record):
   links = music_record.find_all('a')
+  if len(links) < 4:
+    return None
   artist = links[3].contents[0]
   title = links[2].contents[0]
   songID = links[1]['href'].replace('javascript:melon.link.goSongDetail(\'','').replace('\');', '')
@@ -77,6 +79,7 @@ def getMelonChart():
   opener.addheaders = [('User_agent', 'Mozilla/5.0')]
   html = opener.open(url)
   content = html.read()
+#  print(content)
 
   soup = BeautifulSoup(content, "html.parser")
 #  print(soup)
