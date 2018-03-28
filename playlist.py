@@ -1,3 +1,5 @@
+#-*- coding:utf-8 -*-
+
 import os
 
 class PlayListCreater():
@@ -9,7 +11,7 @@ class PlayListCreater():
     if os.path.exists(filepath):
       self._listFile_ = None
       raise FileExistsError
-    self._listFile_ = open(filepath, mode='w', encoding='utf-8')
+    self._listFile_ = open(filepath, mode='w')
     self._writeList_('#EXTM3U')
 
   def __del__(self):
@@ -20,5 +22,5 @@ class PlayListCreater():
     self._listFile_.write(str + '\r\n')
     self._listFile_.flush()
 
-  def storePlayList(self, musicFilePath):
-    self._writeList_(musicFilePath)
+  def storePlayList(self, baseDir, musicFilePath):
+    self._writeList_(os.path.join(baseDir, musicFilePath))

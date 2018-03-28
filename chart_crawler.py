@@ -1,3 +1,5 @@
+#-*- coding:utf-8 -*-
+
 import music_collector as mc
 from netutils import http
 
@@ -5,6 +7,8 @@ import urllib.request
 import os
 import time
 from bs4 import BeautifulSoup
+import debug
+
 
 def downloadImageFromMelon(url, songID):
   image_dir = mc.IMAGE_DIR
@@ -44,7 +48,7 @@ def getAlbumInfoFromMelon(melon_albumID):
   soup = BeautifulSoup(content, "html.parser")
   soupAlbumName = soup.find('div', {'class':'song_name'})
   albumName = soupAlbumName.contents[-1].replace('\r\n\t\t\t\t\t\t\t\t\t', '').replace('\t', '')
-  print('Getting album information of \'{}\'(id:{})'.format(albumName, melon_albumID))
+  debug.log('Getting album information of \'{}\'(id:{})'.format(albumName, melon_albumID))
 
   info = soup.find('dl', {'class':'list'})
   if info == None:
@@ -63,29 +67,29 @@ def getSongInfoOfMelon(music_record):
   soupSongInfo = music_record.find('a', {'class':'btn button_icons type03 song_info'})
   soupAlbumInfo = music_record.find('div', {'class':'ellipsis rank03'})
 
-  print('=========')
-  print('soupArtist')
+  debug.log('=========')
+  debug.log('soupArtist')
   artist = ''
-#  print(soupArtist)
+#  debug.log(soupArtist)
   artistCount = 0
   for art in soupArtist.find('span', {'class':'checkEllipsis'}).find_all('a'):
     if artistCount > 0:
       artist += ','
     artist += art.contents[0]
     artistCount += 1
-  print(artist)
-  print('soupTitle')
-#  print(soupTitle)
+  debug.log(artist)
+  debug.log('soupTitle')
+#  debug.log(soupTitle)
   title = soupTitle.find('a').contents[0]
-  print(title)
-  print('soupSongInfo')
-#  print(soupSongInfo)
+  debug.log(title)
+  debug.log('soupSongInfo')
+#  debug.log(soupSongInfo)
   songID = soupSongInfo['href'].replace('javascript:melon.link.goSongDetail(\'', '').replace('\');', '')
-  print(songID)
-  print('soupAlbumInfo')
-#  print(soupAlbumInfo)
+  debug.log(songID)
+  debug.log('soupAlbumInfo')
+#  debug.log(soupAlbumInfo)
   albumID = soupAlbumInfo.find('a')['href'].replace('javascript:melon.link.goAlbumDetail(\'', '').replace('\');', '')
-  print(albumID)
+  debug.log(albumID)
   '''
   links = music_record.find_all('a')
   if len(links) < 4:
@@ -96,8 +100,8 @@ def getSongInfoOfMelon(music_record):
   albumID = links[5]['href'].replace('javascript:melon.link.goAlbumDetail(\'', '').replace('\');', '')
   if len(albumID) > 10:
     for link in links:
-      print(link)
-  print(albumID)
+      debug.log(link)
+  debug.log(albumID)
   '''
   image = music_record.find('img')
   coverImageURL = image['src'].split('.jpg')[0] + '.jpg'
@@ -113,18 +117,18 @@ def getMelonChart(maxRank = 50):
     maxRank = 50
   url = "http://www.melon.com/chart/week/"
   content = http.getHTMLDocument(url)
-#  print(content)
+#  debug.log(content)
 
   soup = BeautifulSoup(content, "html.parser")
-#  print(soup)
+#  debug.log(soup)
   period = soup.find('div', {'class':'calendar_prid'})
   chart_name = 'melon_weekly_'\
                + period.find('span').contents[0].replace('\r\n\t\t\t\t\t\t', '').replace('\t', '').replace(' ~ ', '-')
-  print(chart_name)
+  debug.log(chart_name)
 
   table = soup.find(style='width:100%')
-#  print(table)
-  print('')
+#  debug.log(table)
+  debug.log('')
   count = 1
   chart_list = []
   for music in table.find_all('tr'):
@@ -134,14 +138,14 @@ def getMelonChart(maxRank = 50):
     links = music.find_all('a')
     if len(links) > 3:
       artist , title, songID, coverImgFile, lyric, albumID = getSongInfoOfMelon(music)
-      print('{:02}. {} - {} (id:{}, {})'.format(count, artist, title, songID, coverImgFile))
+      debug.log('{:02}. {} - {} (id:{}, {})'.format(count, artist, title, songID, coverImgFile))
       chart_list.append({'rank':count, 'artist':artist, 'title':title,
                          'songID':songID, 'albumID':albumID, 'lyric':lyric})
-#      print(lyric)
+#      debug.log(lyric)
       count += 1
   return chart_name, chart_list
 
 if __name__ == '__main__':
   chartlist = getMelonChart()
   for song in chartlist:
-    print(song)
+    debug.log(song)

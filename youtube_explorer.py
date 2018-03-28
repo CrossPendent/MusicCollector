@@ -4,11 +4,12 @@
 import os
 import subprocess
 from bs4 import BeautifulSoup
-import requests
 import urllib.parse
 from pytube import YouTube
 from netutils import http
 import chart_crawler as cc
+
+import debug
 
 from mutagen.mp3 import MP3
 from mutagen.id3 import ID3, APIC, USLT, TOPE, TIT1, TIT2, TPE1, TIPL, TPRO, TCON, TPUB, TDOR, TDRL, TALB
@@ -29,17 +30,17 @@ def find_youtube(query):
   base_url = 'https://www.youtube.co.kr'
   req_url = base_url + '/results?search_query=' + urllib.parse.quote(query)
   response = http.getHTMLDocument(req_url)
-  #print(response)
+  #debug.log(response)
 
   soup = BeautifulSoup(response, "html.parser")
-  #print(soup)
+  #debug.log(soup)
   watch_urls = []
   for link in soup.find_all('h3', {'class':'yt-lockup-title'}):
     watch_urls.append(base_url + link.find('a').attrs['href'])
   return watch_urls
 
 def download_audio_from_youtube(url, output_dir, strQuery):
-  print('\'{}\' will be downloaded from \'{}\''.format(strQuery, url))
+  debug.log('\'{}\' will be downloaded from \'{}\''.format(strQuery, url))
   yt = YouTube(url)
   audio_list = yt.streams.filter(only_audio=True).all()
   filename = convertQueryToFilename(strQuery)
@@ -147,9 +148,9 @@ def convertMP3(baseDIR, old_filename, new_file_path):
 def getSongFromYouTube(artist, title, songID, lyric, albumID, baseMusicDir, baseImageDir):
   audio_name = '{}-{}'.format(artist, title)
   query = '{} audio'.format(audio_name)
-  print('Looking for youtube by the query \'{}\''.format(query))
+  debug.log('Looking for youtube by the query \'{}\''.format(query))
   list = find_youtube(query)
-  print('\'' + query + '\' is downloading.')
+  debug.log('\'' + query + '\' is downloading.')
 
   if not os.path.exists(baseMusicDir):
     os.mkdir(baseMusicDir)
@@ -163,17 +164,17 @@ def getSongFromYouTube(artist, title, songID, lyric, albumID, baseMusicDir, base
   mp3_filename = filename+'.mp3'
   mp3_path = os.path.join(mp3_dir, mp3_filename)
   if os.path.exists(os.path.join(baseMusicDir, mp3_path)):
-    print('{} is already exist. Downloading will be skipped.'.format(mp3_path))
+    debug.log('{} is already exist. Downloading will be skipped.'.format(mp3_path))
   else:
     file_name = download_audio_from_youtube(list[0], baseMusicDir, audio_name)
-    print('\'' + file_name + '\' was downloaded.')
-    print('\'' + file_name + '\' is converting...')
+    debug.log('\'' + file_name + '\' was downloaded.')
+    debug.log('\'' + file_name + '\' is converting...')
     convertMP3(baseMusicDir, file_name, mp3_path)
-    print('\'' + mp3_path + '\' was converted.')
+    debug.log('\'' + mp3_path + '\' was converted.')
     img_path = os.path.join(baseImageDir, songID + '.jpg')
     setID3(baseMusicDir, mp3_path, artist, title, lyric, albumID, img_path)
     os.remove(img_path)
-    print('Song Information was recorded on \'' + mp3_path + '\'')
+    debug.log('Song Information was recorded on \'' + mp3_path + '\'')
 
   return mp3_path
 

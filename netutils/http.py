@@ -1,5 +1,9 @@
+#-*- coding:utf-8 -*-
+
 import urllib.request
 import time
+
+import debug
 
 def getHTMLDocument(url, autoRetry=True):
   listAgent = ['Mozilla/5.0 (Windows NT 6.3; WOW64; Trident/7.0; rv:11.0) like Gecko',
@@ -24,13 +28,13 @@ def getHTMLDocument(url, autoRetry=True):
       html = opener.open(url)
     except ConnectionResetError as e:
       if autoRetry:
-        print('Connection denied from \'{}\''.format(url))
-        print('Try again using another header after {}sec...'.format(retryDelay[delayCount]))
+        debug.log('Connection denied from \'{}\''.format(url))
+        debug.log('Try again using another header after {}sec...'.format(retryDelay[delayCount]))
         agentCount = (agentCount+1) % len(listAgent)
         time.sleep(retryDelay[delayCount])
         delayCount = (delayCount+1) % len(retryDelay)
       else:
-        print('Document couldn\'t be get from {}'.format(url))
+        debug.log('Document couldn\'t be get from {}'.format(url))
         return None
     else:
       conLoop = False
