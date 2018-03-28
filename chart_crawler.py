@@ -1,40 +1,10 @@
 import music_collector as mc
+from netutils import http
 
 import urllib.request
 import os
 import time
 from bs4 import BeautifulSoup
-
-def getHTMLContents(url):
-  listAgent = ['Mozilla/5.0 (Windows NT 6.3; WOW64; Trident/7.0; rv:11.0) like Gecko',
-               'Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3325.181 Safari/537.36',
-               'Mozilla/5.0 (Windows NT 5.1; rv:6.0.2) Gecko/20100101 Firefox/6.0.2',
-               'Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1)',
-               ]
-  retryDelay = [0.1, 0.5, 1, 2, 5, 10, 30, 60, 300]
-  conLoop = True
-  agentCount = 0
-  delayCount = 0
-  while(conLoop):
-    opener = urllib.request.build_opener()
-    opener.addheaders = [('Accept', 'text/html, application/xhtml+xml, */*'),
-                         ('Accept-Language', 'ko-KR'),
-                         ('User_agent', listAgent[agentCount]),
-                         ('Host', 'www.melon.com'),
-                         ('DNT', '1'),
-                         ('Connection', 'Keep-Alive'),
-                         ("Content-Type", "application/x-www-form-urlencoded;charset=utf-8")]
-    try:
-      html = opener.open(url)
-    except ConnectionResetError as e:
-      print('Connection denied from \'{}\''.format(url))
-      print('Try again using another header after {}sec...'.format(retryDelay[delayCount]))
-      agentCount = (agentCount+1) % len(listAgent)
-      time.sleep(retryDelay[delayCount])
-      delayCount = (delayCount+1) % len(retryDelay)
-    else:
-      conLoop = False
-  return html.read()
 
 def downloadImageFromMelon(url, songID):
   image_dir = mc.IMAGE_DIR
@@ -48,7 +18,7 @@ def getLyricFromMelon(melon_songID):
   base_url = 'http://www.melon.com/song/detail.htm?songId='
   url = base_url + melon_songID;
 
-  content = getHTMLContents(url)
+  content = http.getHTMLDocument(url)
 
   soup = BeautifulSoup(content, "html.parser")
   raw_lyric = soup.find('div', {'class':'lyric'}).contents[1:]
@@ -69,12 +39,12 @@ def getAlbumInfoFromMelon(melon_albumID):
   base_url = 'http://www.melon.com/album/detail.htm?albumId='
   url = base_url + melon_albumID
 
-  content = getHTMLContents(url)
+  content = http.getHTMLDocument(url)
 
   soup = BeautifulSoup(content, "html.parser")
   soupAlbumName = soup.find('div', {'class':'song_name'})
   albumName = soupAlbumName.contents[-1].replace('\r\n\t\t\t\t\t\t\t\t\t', '').replace('\t', '')
-  print(albumName)
+  print('Getting album information of \'{}\'(id:{})'.format(albumName, melon_albumID))
 
   info = soup.find('dl', {'class':'list'})
   if info == None:
@@ -129,24 +99,28 @@ def getSongInfoOfMelon(music_record):
       print(link)
   print(albumID)
   '''
-  albumInfo = getAlbumInfoFromMelon(albumID)
-
   image = music_record.find('img')
   coverImageURL = image['src'].split('.jpg')[0] + '.jpg'
   coverImgFile = downloadImageFromMelon(coverImageURL, songID)
   lyric = getLyricFromMelon(songID)
 
-  return artist, title, songID, coverImgFile, lyric, albumInfo
+  return artist, title, songID, coverImgFile, lyric, albumID
 
-def getMelonChart():
+def getMelonChart(maxRank = 50):
+  if maxRank < 1:
+    maxRank = 1
+  elif maxRank > 50:
+    maxRank = 50
   url = "http://www.melon.com/chart/week/"
-  content = getHTMLContents(url)
+  content = http.getHTMLDocument(url)
 #  print(content)
 
   soup = BeautifulSoup(content, "html.parser")
 #  print(soup)
   period = soup.find('div', {'class':'calendar_prid'})
-  print(period.find('span').contents[0].replace('\r\n\t\t\t\t\t\t', '').replace('\t', ''))
+  chart_name = 'melon_week_'\
+               + period.find('span').contents[0].replace('\r\n\t\t\t\t\t\t', '').replace('\t', '').replace(' ~ ', '-')
+  print(chart_name)
 
   table = soup.find(style='width:100%')
 #  print(table)
@@ -154,18 +128,18 @@ def getMelonChart():
   count = 1
   chart_list = []
   for music in table.find_all('tr'):
+    if count > maxRank:
+      break
     image = music.find('img')
     links = music.find_all('a')
     if len(links) > 3:
-      artist , title, songID, coverImgFile, lyric, albumInfo = getSongInfoOfMelon(music)
+      artist , title, songID, coverImgFile, lyric, albumID = getSongInfoOfMelon(music)
       print('{:02}. {} - {} (id:{}, {})'.format(count, artist, title, songID, coverImgFile))
       chart_list.append({'rank':count, 'artist':artist, 'title':title,
-                         'songID':songID, 'albumInfo':albumInfo, 'lyric':lyric})
+                         'songID':songID, 'albumID':albumID, 'lyric':lyric})
 #      print(lyric)
       count += 1
-      if count > 20:
-        break
-  return chart_list
+  return chart_name, chart_list
 
 if __name__ == '__main__':
   chartlist = getMelonChart()

@@ -1,12 +1,14 @@
 # -*- coding: utf-8 -*-
 
-import music_collector as mc
+#import music_collector as mc
 import os
 import subprocess
 from bs4 import BeautifulSoup
 import requests
 import urllib.parse
 from pytube import YouTube
+from netutils import http
+import chart_crawler as cc
 
 from mutagen.mp3 import MP3
 from mutagen.id3 import ID3, APIC, USLT, TOPE, TIT1, TIT2, TPE1, TIPL, TPRO, TCON, TPUB, TDOR, TDRL, TALB
@@ -26,10 +28,10 @@ def convertQueryToFilename(strQuery):
 def find_youtube(query):
   base_url = 'https://www.youtube.co.kr'
   req_url = base_url + '/results?search_query=' + urllib.parse.quote(query)
-  response = requests.get(req_url)
+  response = http.getHTMLDocument(req_url)
   #print(response)
 
-  soup = BeautifulSoup(response.text, "html.parser")
+  soup = BeautifulSoup(response, "html.parser")
   #print(soup)
   watch_urls = []
   for link in soup.find_all('h3', {'class':'yt-lockup-title'}):
@@ -37,16 +39,15 @@ def find_youtube(query):
   return watch_urls
 
 def download_audio_from_youtube(url, output_dir, strQuery):
-  filename = convertQueryToFilename(strQuery)
+  print('\'{}\' will be downloaded from \'{}\''.format(strQuery, url))
   yt = YouTube(url)
   audio_list = yt.streams.filter(only_audio=True).all()
-  if not os.path.exists(output_dir):
-    os.mkdir(output_dir)
-  if not os.path.exists(os.path.join(output_dir, filename+'.mp3')):
-    audio_list[0].download(output_dir, filename)
-  return os.path.join(output_dir, filename + '.mp4')
+  filename = convertQueryToFilename(strQuery)
+  audio_list[0].download(output_dir, filename)
+  return (filename + '.mp4')
 
-def setID3(file_path, artist, title, lyric, albumInfo, cover_img_path):
+def setID3(baseDIR, filename, artist, title, lyric, albumID, cover_img_path):
+  file_path = os.path.join(baseDIR, filename)
   audio_file = MP3(file_path, ID3=ID3)
   encoding=3   # 3 is for utf-8
   # add CoverPicture
@@ -96,6 +97,7 @@ def setID3(file_path, artist, title, lyric, albumInfo, cover_img_path):
       text=[artist]
     )
   )
+  albumInfo = cc.getAlbumInfoFromMelon(albumID)
   if not albumInfo == None:
     audio_file.tags.add(
       TALB(
@@ -135,24 +137,40 @@ def setID3(file_path, artist, title, lyric, albumInfo, cover_img_path):
     )
   audio_file.save()
 
-def convertMP3(old_file_path):
-  mp3_path = old_file_path.replace('.mp4', '.mp3')
+def convertMP3(baseDIR, old_filename):
+  mp3_name = old_filename.replace('.mp4', '.mp3')
+  mp3_path = os.path.join(baseDIR, mp3_name)
+  old_path = os.path.join(baseDIR,old_filename)
   if not os.path.exists(mp3_path):
-    subprocess.call(['ffmpeg', '-i', old_file_path, mp3_path])
-    os.remove(old_file_path)
-  return mp3_path
+    subprocess.call(['ffmpeg', '-i', old_path, mp3_path])
+    os.remove(old_path)
+  return mp3_name
 
-def getSongFromYouTube(artist, title, songID, lyric, albumInfo):
-  query = '{}-{}'.format(artist, title)
+def getSongFromYouTube(artist, title, songID, lyric, albumID, baseDIR):
+  audio_name = '{}-{}'.format(artist, title)
+  query = '{} audio'.format(audio_name)
+  print('Looking for youtube by the query \'{}\''.format(query))
   list = find_youtube(query)
   print('\'' + query + '\' is downloading.')
-  file_path = download_audio_from_youtube(list[0], mc.MUSIC_FILE_DIR, query)
-  print('\'' + file_path + '\' was downloaded.')
-  print('\'' + file_path + '\' is converting...')
-  new_file_path = convertMP3(file_path)
-  print('\'' + new_file_path + '\' was converted.')
-  setID3(new_file_path, artist, title, lyric, albumInfo, os.path.join(mc.IMAGE_DIR, songID+'.jpg'))
-  print('Song Information was recorded on \'' + new_file_path + '\'')
+
+  if not os.path.exists(baseDIR):
+    os.mkdir(baseDIR)
+  filename = convertQueryToFilename(audio_name)
+
+  mp3_filename = filename+'.mp3'
+  if os.path.exists(os.path.join(baseDIR, mp3_filename)):
+    print('{} is already exist. Downloading will be skipped.'.format(filename+'.mp3'))
+    new_filename = mp3_filename
+  else:
+    file_name = download_audio_from_youtube(list[0], baseDIR, audio_name)
+    print('\'' + file_name + '\' was downloaded.')
+    print('\'' + file_name + '\' is converting...')
+    new_filename = convertMP3(baseDIR, file_name)
+    print('\'' + new_filename + '\' was converted.')
+    setID3(baseDIR, new_filename, artist, title, lyric, albumID, os.path.join(baseDIR, songID+'.jpg'))
+    print('Song Information was recorded on \'' + new_filename + '\'')
+
+  return new_filename
 
 if __name__ == '__main__':
   lyric = u'''
@@ -160,4 +178,4 @@ if __name__ == '__main__':
   deb
   ddd
   '''
-  getSongFromYouTube('BIGBANG', '꽃 길', '30948698', lyric)
+#  getSongFromYouTube('BIGBANG', '꽃 길', '30948698', lyric)
