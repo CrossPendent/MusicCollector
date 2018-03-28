@@ -15,7 +15,7 @@ from mutagen.id3 import ID3, APIC, USLT, TOPE, TIT1, TIT2, TPE1, TIPL, TPRO, TCO
 
 def convertQueryToFilename(strQuery):
   listTargetKeys = ['\"', '#', '$', '%', '\'', '*', ',', '.', '/', ':', '"',
-                    ';', '<', '>', '?', '\\', '^', '|', '~', '\\\\',]
+                    ';', '<', '>', '?', '\\', '^', '|', '~', '\\\\']
   '''
   listTargetKeys = ['~', '`', '!', '@', '#', '$', '%', '^', '&', '*', '+', '=', '|',
                     '\\', '"', '\'', ':', ';', '?', '/', '<', '>', ',', '.']
@@ -137,40 +137,45 @@ def setID3(baseDIR, filename, artist, title, lyric, albumID, cover_img_path):
     )
   audio_file.save()
 
-def convertMP3(baseDIR, old_filename):
-  mp3_name = old_filename.replace('.mp4', '.mp3')
-  mp3_path = os.path.join(baseDIR, mp3_name)
+def convertMP3(baseDIR, old_filename, new_file_path):
+  mp3_path = os.path.join(baseDIR, new_file_path)
   old_path = os.path.join(baseDIR,old_filename)
   if not os.path.exists(mp3_path):
     subprocess.call(['ffmpeg', '-i', old_path, mp3_path])
     os.remove(old_path)
-  return mp3_name
 
-def getSongFromYouTube(artist, title, songID, lyric, albumID, baseDIR):
+def getSongFromYouTube(artist, title, songID, lyric, albumID, baseMusicDir, baseImageDir):
   audio_name = '{}-{}'.format(artist, title)
   query = '{} audio'.format(audio_name)
   print('Looking for youtube by the query \'{}\''.format(query))
   list = find_youtube(query)
   print('\'' + query + '\' is downloading.')
 
-  if not os.path.exists(baseDIR):
-    os.mkdir(baseDIR)
+  if not os.path.exists(baseMusicDir):
+    os.mkdir(baseMusicDir)
   filename = convertQueryToFilename(audio_name)
-
+  mp3_parent = os.path.join(baseMusicDir, convertQueryToFilename(artist))
+  if not os.path.exists(mp3_parent):
+    os.mkdir(mp3_parent)
+  mp3_dir = os.path.join(convertQueryToFilename(artist), albumID)
+  if not os.path.exists(os.path.join(baseMusicDir, mp3_dir)):
+    os.mkdir(os.path.join(baseMusicDir, mp3_dir))
   mp3_filename = filename+'.mp3'
-  if os.path.exists(os.path.join(baseDIR, mp3_filename)):
-    print('{} is already exist. Downloading will be skipped.'.format(filename+'.mp3'))
-    new_filename = mp3_filename
+  mp3_path = os.path.join(mp3_dir, mp3_filename)
+  if os.path.exists(os.path.join(baseMusicDir, mp3_path)):
+    print('{} is already exist. Downloading will be skipped.'.format(mp3_path))
   else:
-    file_name = download_audio_from_youtube(list[0], baseDIR, audio_name)
+    file_name = download_audio_from_youtube(list[0], baseMusicDir, audio_name)
     print('\'' + file_name + '\' was downloaded.')
     print('\'' + file_name + '\' is converting...')
-    new_filename = convertMP3(baseDIR, file_name)
-    print('\'' + new_filename + '\' was converted.')
-    setID3(baseDIR, new_filename, artist, title, lyric, albumID, os.path.join(baseDIR, songID+'.jpg'))
-    print('Song Information was recorded on \'' + new_filename + '\'')
+    convertMP3(baseMusicDir, file_name, mp3_path)
+    print('\'' + mp3_path + '\' was converted.')
+    img_path = os.path.join(baseImageDir, songID + '.jpg')
+    setID3(baseMusicDir, mp3_path, artist, title, lyric, albumID, img_path)
+    os.remove(img_path)
+    print('Song Information was recorded on \'' + mp3_path + '\'')
 
-  return new_filename
+  return mp3_path
 
 if __name__ == '__main__':
   lyric = u'''

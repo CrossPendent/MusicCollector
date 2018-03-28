@@ -118,7 +118,7 @@ def getMelonChart(maxRank = 50):
   soup = BeautifulSoup(content, "html.parser")
 #  print(soup)
   period = soup.find('div', {'class':'calendar_prid'})
-  chart_name = 'melon_week_'\
+  chart_name = 'melon_weekly_'\
                + period.find('span').contents[0].replace('\r\n\t\t\t\t\t\t', '').replace('\t', '').replace(' ~ ', '-')
   print(chart_name)
 
