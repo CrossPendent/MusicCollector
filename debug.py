@@ -1,7 +1,8 @@
 #-*- coding:utf-8 -*-
 
-def log(str=''):
+def log(msg=''):
+    out = str(msg)
     try:
-        print(str)
+        print(out)
     except UnicodeEncodeError as e:
-        print(str.encode('utf-8'))
+        print(out.encode('utf-8'))
