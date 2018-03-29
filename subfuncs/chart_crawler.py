@@ -1,13 +1,11 @@
 #-*- coding:utf-8 -*-
 
 import music_collector as mc
-from netutils import http
+from utils import http, debug
 
 import urllib.request
 import os
-import time
 from bs4 import BeautifulSoup
-import debug
 
 
 def downloadImageFromMelon(url, songID):

@@ -1,5 +1,5 @@
 import unittest
-import chart_crawler as cc
+from subfuncs import chart_crawler as cc
 from bs4 import BeautifulSoup
 import test.test_variables as testvar
 

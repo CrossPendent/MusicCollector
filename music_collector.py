@@ -1,12 +1,14 @@
 #-*- coding:utf-8 -*-
 
-import chart_crawler as cc
-import youtube_explorer as ye
-from playlist import PlayListCreater
+from subfuncs import youtube_explorer as ye, chart_crawler as cc
+from subfuncs.playlist import PlayListCreater
+import argparse
 
-import debug
+from utils import debug
 
-_TEST_MODE_ON_WINDOWS_ = False
+FLAGS = None
+
+_TEST_MODE_ON_WINDOWS_ = True
 
 if _TEST_MODE_ON_WINDOWS_:
   IMAGE_DIR = 'cover_img'
@@ -40,4 +42,14 @@ def main():
     debug.log('\nMusic Collecting and Creating chart are done.')
 
 if __name__ == '__main__':
+  parser = argparse.ArgumentParser()
+  parser.add_argument('-p', '--period', type=str, choices=['daily', 'weekly', 'monthly'], default='weelky',
+                      help='chart period')
+  parser.add_argument('-r', '--rank', type=int, default=50,
+                      help='maxinum rank as you want to get from chart (1<=RANK<=50)')
+  parser.add_argument('-l', '--refresh-list', action='store_true',
+                      help='overwrites the playlist when the same list is found.')
+  parser.add_argument('-o', '--overwrite-files', action='store_true',
+                      help='overwrites the audio file when the same file is found.')
+  FLAGS = parser.parse_args()
   main()

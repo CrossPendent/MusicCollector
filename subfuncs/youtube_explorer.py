@@ -6,10 +6,8 @@ import subprocess
 from bs4 import BeautifulSoup
 import urllib.parse
 from pytube import YouTube
-from netutils import http
-import chart_crawler as cc
-
-import debug
+from utils import http, debug
+from subfuncs import chart_crawler as cc
 
 from mutagen.mp3 import MP3
 from mutagen.id3 import ID3, APIC, USLT, TOPE, TIT1, TIT2, TPE1, TIPL, TPRO, TCON, TPUB, TDOR, TDRL, TALB

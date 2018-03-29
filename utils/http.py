@@ -3,7 +3,8 @@
 import urllib.request
 import time
 
-import debug
+from utils import debug
+
 
 def getHTMLDocument(url, autoRetry=True):
   listAgent = ['Mozilla/5.0 (Windows NT 6.3; WOW64; Trident/7.0; rv:11.0) like Gecko',
