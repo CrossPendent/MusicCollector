@@ -24,6 +24,22 @@ def convertQueryToFilename(strQuery):
     strFileName = strFileName.replace(letter, '')
   return strFileName
 
+def find_youtube_detailed(query):
+  base_url = 'https://www.youtube.co.kr'
+  req_url = base_url + '/results?search_query=' + urllib.parse.quote(query)
+  response = http.getHTMLDocument(req_url)
+  #debug.log(response)
+
+  soup = BeautifulSoup(response, "html.parser")
+  #debug.log(soup)
+  watch_list = []
+  for link in soup.find_all('h3', {'class':'yt-lockup-title'}):
+    record = {'title':link.find('a').contents[0],
+              'length':link.find('span').contents[0],
+              'url':base_url + link.find('a').attrs['href']}
+    watch_list.append(record)
+  return watch_list
+
 def find_youtube(query):
   base_url = 'https://www.youtube.co.kr'
   req_url = base_url + '/results?search_query=' + urllib.parse.quote(query)

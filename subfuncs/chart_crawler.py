@@ -16,13 +16,15 @@ def downloadImageFromMelon(url, songID):
   urllib.request.urlretrieve(url, os.path.join(image_dir, file_name))
   return file_name
 
-def getLyricFromMelon(melon_songID):
+def getSongInfobySongIDOfMelon(melon_songID):
   base_url = 'http://www.melon.com/song/detail.htm?songId='
   url = base_url + melon_songID;
 
   content = http.getHTMLDocument(url)
 
   soup = BeautifulSoup(content, "html.parser")
+
+  # parse lyric
   raw_lyric = soup.find('div', {'class':'lyric'}).contents[1:]
   raw_lyric[0] = raw_lyric[0].replace('\r\n\t\t\t\t\t\t\t\t', '')
 
@@ -33,6 +35,23 @@ def getLyricFromMelon(melon_songID):
     else:
       lyric = lyric + str(line)
 
+  # parse other information
+  title = soup.find('div', {'class':'song_name'}).contents[-1].replace('\r\n', '').replace('\t', '')
+
+  artist = ''
+  artistCount = 0
+  for art in soup.find('div', {'class': 'artist'}).find_all('a'):
+    if artistCount > 0:
+      artist += ','
+    artist += art.find('span').contents[0]
+    artistCount += 1
+
+  albumID = soup.find('dl', {'class':'list'}).find('a')['href'].split('\'')[1]
+
+  return lyric, artist, title, albumID
+
+def getLyricFromMelon(melon_songID):
+  lyric, _, _, _  = getSongInfobySongIDOfMelon(melon_songID)
   return lyric
 
 def getAlbumInfoFromMelon(melon_albumID):
