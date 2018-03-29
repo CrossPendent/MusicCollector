@@ -30,7 +30,9 @@ def main():
   else:
     debug.log('\nMaking the MP3 files...')
     for song in chart:
-      debug.log(song)
+      debug.log(
+        'rank:{:02}, artist:{}, title:{}, songID:{}, albumID:{}'.format(
+          song['rank'], song['artist'], song['title'], song['songID'], song['albumID']))
       audio_file_path = ye.getSongFromYouTube(
         song['artist'], song['title'], song['songID'], song['lyric'], song['albumID'], MUSIC_FILE_DIR, IMAGE_DIR)
       playList.storePlayList(MUSIC_FILE_DIR, audio_file_path)

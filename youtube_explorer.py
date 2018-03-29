@@ -43,6 +43,8 @@ def download_audio_from_youtube(url, output_dir, strQuery):
   debug.log('\'{}\' will be downloaded from \'{}\''.format(strQuery, url))
   yt = YouTube(url)
   audio_list = yt.streams.filter(only_audio=True).all()
+  if audio_list == []:
+    audio_list = yt.streams.filter().all()
   filename = convertQueryToFilename(strQuery)
   audio_list[0].download(output_dir, filename)
   return (filename + '.mp4')
