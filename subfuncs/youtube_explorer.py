@@ -145,7 +145,7 @@ def convertMP3(baseDIR, old_filename, new_file_path):
     subprocess.call(['ffmpeg', '-i', old_path, mp3_path])
     os.remove(old_path)
 
-def getSongFromYouTube(artist, title, songID, lyric, albumID, baseMusicDir, baseImageDir):
+def getSongFromYouTube(artist, title, songID, lyric, albumID, baseMusicDir, baseImageDir, isOverwriteMode=False):
   audio_name = '{}-{}'.format(artist, title)
   query = '{} audio'.format(audio_name)
   debug.log('Looking for youtube by the query \'{}\''.format(query))
@@ -163,9 +163,16 @@ def getSongFromYouTube(artist, title, songID, lyric, albumID, baseMusicDir, base
     os.mkdir(os.path.join(baseMusicDir, mp3_dir))
   mp3_filename = filename+'.mp3'
   mp3_path = os.path.join(mp3_dir, mp3_filename)
+  # check whether mp3 file already exists.
+  isSkip = False
   if os.path.exists(os.path.join(baseMusicDir, mp3_path)):
-    debug.log('{} is already exist. Downloading will be skipped.'.format(mp3_path))
-  else:
+    if isOverwriteMode:
+      debug.log('{} is already exist. it will be overwritten.'.format(mp3_path))
+      os.remove(os.path.join(baseMusicDir, mp3_path))
+    else:
+      debug.log('{} is already exist. Downloading will be skipped.'.format(mp3_path))
+      isSkip = True
+  if not isSkip:
     file_name = download_audio_from_youtube(list[0], baseMusicDir, audio_name)
     debug.log('\'' + file_name + '\' was downloaded.')
     debug.log('\'' + file_name + '\' is converting...')

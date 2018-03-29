@@ -23,10 +23,10 @@ else:
 
 def main():
   debug.log('Collecting the chart information from Melon...')
-  chart_name, chart = cc.getMelonChart(MAX_RANK)
+  chart_name, chart = cc.getMelonChart(FLAGS.rank)
   #  debug.log(chart)
   try:
-    playList = PlayListCreater(PLAYLISTS_DIR, chart_name)
+    playList = PlayListCreater(PLAYLISTS_DIR, chart_name, FLAGS.refresh_list)
   except FileExistsError as e:
     debug.log('Chart file(\'{}.m3u\') already exsits.'.format(chart_name))
   else:
@@ -36,20 +36,22 @@ def main():
         'rank:{:02}, artist:{}, title:{}, songID:{}, albumID:{}'.format(
           song['rank'], song['artist'], song['title'], song['songID'], song['albumID']))
       audio_file_path = ye.getSongFromYouTube(
-        song['artist'], song['title'], song['songID'], song['lyric'], song['albumID'], MUSIC_FILE_DIR, IMAGE_DIR)
+        song['artist'], song['title'], song['songID'], song['lyric'], song['albumID'], MUSIC_FILE_DIR, IMAGE_DIR,
+        FLAGS.overwrite_files)
       playList.storePlayList(MUSIC_FILE_DIR, audio_file_path)
     del playList
     debug.log('\nMusic Collecting and Creating chart are done.')
 
 if __name__ == '__main__':
   parser = argparse.ArgumentParser()
-  parser.add_argument('-p', '--period', type=str, choices=['daily', 'weekly', 'monthly'], default='weelky',
-                      help='chart period')
-  parser.add_argument('-r', '--rank', type=int, default=50,
-                      help='maxinum rank as you want to get from chart (1<=RANK<=50)')
+  parser.add_argument('-p', '--period', type=str, choices=['daily', 'weekly', 'monthly'], default='weekly',
+                      help='chart period (default={})'.format('weekly'))
+  parser.add_argument('-r', '--rank', type=int, default=MAX_RANK,
+                      help='maxinum rank as you want to get from chart (1<=RANK<=50) (default={})'.format(MAX_RANK))
   parser.add_argument('-l', '--refresh-list', action='store_true',
                       help='overwrites the playlist when the same list is found.')
   parser.add_argument('-o', '--overwrite-files', action='store_true',
                       help='overwrites the audio file when the same file is found.')
   FLAGS = parser.parse_args()
+  print(FLAGS)
   main()

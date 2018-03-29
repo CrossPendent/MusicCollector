@@ -3,14 +3,17 @@
 import os
 
 class PlayListCreater():
-  def __init__(self, basePath, listFileName):
+  def __init__(self, basePath, listFileName, isOverwriteMode=False):
     wholeFilename = listFileName + '.m3u'
     filepath = os.path.join(basePath, wholeFilename)
     if not os.path.exists(basePath):
       os.mkdir(basePath)
     if os.path.exists(filepath):
-      self._listFile_ = None
-      raise FileExistsError
+      if isOverwriteMode:
+        os.remove(filepath)
+      else:
+        self._listFile_ = None
+        raise FileExistsError
     self._listFile_ = open(filepath, mode='w')
     self._writeList_('#EXTM3U')
 
