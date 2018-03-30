@@ -34,10 +34,13 @@ def find_youtube_detailed(query):
   #debug.log(soup)
   watch_list = []
   for link in soup.find_all('h3', {'class':'yt-lockup-title'}):
-    record = {'title':link.find('a').contents[0],
-              'length':link.find('span').contents[0],
-              'url':base_url + link.find('a').attrs['href']}
-    watch_list.append(record)
+    length_keyword = ' - 길이: '
+    length_info = link.find('span').contents[0]
+    if length_info.find(length_keyword) >= 0:
+      record = {'title':link.find('a').contents[0],
+                'length':length_info.replace(length_keyword, ''),
+                'url':base_url + link.find('a').attrs['href']}
+      watch_list.append(record)
   return watch_list
 
 def find_youtube(query):
@@ -154,9 +157,9 @@ def setID3(baseDIR, filename, artist, title, lyric, albumID, cover_img_path):
     )
   audio_file.save()
 
-def convertMP3(baseDIR, old_filename, new_file_path):
-  mp3_path = os.path.join(baseDIR, new_file_path)
-  old_path = os.path.join(baseDIR,old_filename)
+def convertMP3(baseDIR, old_filename, new_filename):
+  mp3_path = os.path.join(baseDIR, new_filename)
+  old_path = os.path.join(baseDIR, old_filename)
   if not os.path.exists(mp3_path):
     subprocess.call(['ffmpeg', '-i', old_path, mp3_path])
     os.remove(old_path)
