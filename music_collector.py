@@ -3,12 +3,13 @@
 from subfuncs import youtube_explorer as ye, chart_crawler as cc
 from subfuncs.playlist import PlayListCreater
 import argparse
+import sys
 
 from utils import debug
 
 FLAGS = None
 
-_TEST_MODE_ON_WINDOWS_ = True
+_TEST_MODE_ON_WINDOWS_ = (sys.platform != 'linux')
 
 if _TEST_MODE_ON_WINDOWS_:
   IMAGE_DIR = 'cover_img'
@@ -49,7 +50,7 @@ if __name__ == '__main__':
   parser.add_argument('-d', '--date', type=str, default='',
                       help='directs the target date which you want to get chart. (YYYYMMDD)')
   parser.add_argument('-r', '--rank', type=int, default=MAX_RANK,
-                      help='maxinum rank as you want to get from chart (1<=RANK<=50) (default={})'.format(MAX_RANK))
+                      help='maximum rank as you want to get from chart (1<=RANK<=50) (default={})'.format(MAX_RANK))
   parser.add_argument('-l', '--refresh-list', action='store_true',
                       help='overwrites the playlist when the same list is found.')
   parser.add_argument('-o', '--overwrite-files', action='store_true',
