@@ -2,11 +2,11 @@
 
 import music_collector as mc
 from utils import http, debug
+from datetime import date, timedelta
 
 import urllib.request
 import os
 from bs4 import BeautifulSoup
-
 
 def downloadImageFromMelon(url, songID):
   image_dir = mc.IMAGE_DIR
@@ -127,20 +127,45 @@ def getSongInfoOfMelon(music_record):
 
   return artist, title, songID, coverImgFile, lyric, albumID
 
-def getMelonChart(maxRank = 50):
+def getMelonChart(maxRank = 50, period_type ='weekly', str_target_date=None):
+  period_url = {'daily': 'day', 'weekly': 'week', 'monthly': 'month'}
+
   if maxRank < 1:
     maxRank = 1
   elif maxRank > 50:
     maxRank = 50
-  url = "http://www.melon.com/chart/week/"
+  url = "http://www.melon.com/chart/{}/".format(period_url[period_type])
+  if str_target_date != None:
+    target_date = date(int(str_target_date[0:4]),
+                       int(str_target_date[4:6]),
+                       int(str_target_date[6:8]))
+
+    if period_type == 'weekly':
+      strTimeFormat = '%Y%m%d'
+      startDay = target_date - timedelta(days=target_date.weekday())
+      endDay = startDay + timedelta(days=6)
+      url_param = 'params%5BstartDay%5D={}&params%5BendDay%5D={}'.format(
+        startDay.strftime(strTimeFormat), endDay.strftime(strTimeFormat)
+      )
+    else:
+      strTimeFormat = '%Y%m'
+      rankMonth = target_date.strftime(strTimeFormat)
+      url_param = 'params%5BrankMonth%5D={}'.format(rankMonth)
+    url += 'index.htm#' + url_param
+  debug.log("Request chart to melon by query'{}'".format(url))
   content = http.getHTMLDocument(url)
 #  debug.log(content)
 
   soup = BeautifulSoup(content, "html.parser")
 #  debug.log(soup)
   period = soup.find('div', {'class':'calendar_prid'})
-  chart_name = 'melon_weekly_'\
-               + period.find('span').contents[0].replace('\r\n\t\t\t\t\t\t', '').replace('\t', '').replace(' ~ ', '-')
+  if(period_type == 'daily'):
+    period_str = period.find('span', {'class':'year'}).contents[0]
+  else:
+    period_str = period.find('span').contents[0]
+
+  chart_name = 'melon_{}_'.format(period_type)\
+               + period_str.replace('\r\n', '').replace('\t', '').replace(' ~ ', '-')
   debug.log(chart_name)
 
   table = soup.find(style='width:100%')
