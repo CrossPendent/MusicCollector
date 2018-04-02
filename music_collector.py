@@ -45,7 +45,7 @@ def main():
 
 if __name__ == '__main__':
   parser = argparse.ArgumentParser()
-  parser.add_argument('-p', '--period', type=str, choices=['daily', 'weekly', 'monthly'], default='weekly',
+  parser.add_argument('-p', '--period', type=str, choices=['weekly', 'monthly'], default='weekly',
                       help='chart period (default={})'.format('weekly'))
   parser.add_argument('-d', '--date', type=str, default='',
                       help='directs the target date which you want to get chart. (YYYYMMDD)')

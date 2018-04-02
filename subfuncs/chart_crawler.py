@@ -87,7 +87,7 @@ def getSongInfoOfMelon(music_record):
   debug.log('=========')
   debug.log('soupArtist')
   artist = ''
-#  debug.log(soupArtist)
+  # debug.log(soupArtist)
   artistCount = 0
   for art in soupArtist.find('span', {'class':'checkEllipsis'}).find_all('a'):
     if artistCount > 0:
@@ -96,15 +96,15 @@ def getSongInfoOfMelon(music_record):
     artistCount += 1
   debug.log(artist)
   debug.log('soupTitle')
-#  debug.log(soupTitle)
+  # debug.log(soupTitle)
   title = soupTitle.find('a').contents[0]
   debug.log(title)
   debug.log('soupSongInfo')
-#  debug.log(soupSongInfo)
+  # debug.log(soupSongInfo)
   songID = soupSongInfo['href'].replace('javascript:melon.link.goSongDetail(\'', '').replace('\');', '')
   debug.log(songID)
   debug.log('soupAlbumInfo')
-#  debug.log(soupAlbumInfo)
+  # debug.log(soupAlbumInfo)
   albumID = soupAlbumInfo.find('a')['href'].replace('javascript:melon.link.goAlbumDetail(\'', '').replace('\');', '')
   debug.log(albumID)
   '''
@@ -134,46 +134,50 @@ def getMelonChart(maxRank = 50, period_type ='weekly', str_target_date=None):
     maxRank = 1
   elif maxRank > 50:
     maxRank = 50
-  url = "http://www.melon.com/chart/{}/".format(period_url[period_type])
-  if str_target_date != None:
-    target_date = date(int(str_target_date[0:4]),
-                       int(str_target_date[4:6]),
-                       int(str_target_date[6:8]))
-
+  if str_target_date == None:
     if period_type == 'weekly':
-      strTimeFormat = '%Y%m%d'
-      startDay = target_date - timedelta(days=target_date.weekday())
-      endDay = startDay + timedelta(days=6)
-      url_param = 'params%5BstartDay%5D={}&params%5BendDay%5D={}'.format(
-        startDay.strftime(strTimeFormat), endDay.strftime(strTimeFormat)
-      )
+      str_target_date = (date.today() - timedelta(days=date.today().isoweekday())).strftime('%Y%m%d')
     else:
-      strTimeFormat = '%Y%m'
-      rankMonth = target_date.strftime(strTimeFormat)
-      url_param = 'params%5BrankMonth%5D={}'.format(rankMonth)
-    url += 'index.htm#' + url_param
+      str_target_date = (date.today() - timedelta(days=date.today().day)).strftime('%Y%m%d')
+
+  debug.log(str_target_date)
+  target_date = date(int(str_target_date[0:4]),
+                     int(str_target_date[4:6]),
+                     int(str_target_date[6:8]))
+
+  if period_type == 'weekly':
+    strTimeFormat = '%Y%m%d'
+    startDay = target_date - timedelta(days=target_date.weekday())
+    endDay = startDay + timedelta(days=6)
+    url_param = 'startDay={}&endDay={}&'.format(
+      startDay.strftime(strTimeFormat), endDay.strftime(strTimeFormat)
+    )
+  else:
+    strTimeFormat = '%Y%m'
+    rankMonth = target_date.strftime(strTimeFormat)
+    url_param = 'rankMonth={}&'.format(rankMonth)
+  url = "http://www.melon.com/chart/{}/index.htm?{}moved=Y".format(period_url[period_type], url_param)
   debug.log("Request chart to melon by query'{}'".format(url))
   content = http.getHTMLDocument(url)
-#  debug.log(content)
+  # debug.log(content)
 
   soup = BeautifulSoup(content, "html.parser")
-#  debug.log(soup)
-  period = soup.find('div', {'class':'calendar_prid'})
-  if(period_type == 'daily'):
-    period_str = period.find('span', {'class':'year'}).contents[0]
+  # debug.log(soup)
+  if(period_type == 'weekly'):
+    period_str = '{}-{}'.format(startDay.strftime(strTimeFormat), endDay.strftime(strTimeFormat))
   else:
-    period_str = period.find('span').contents[0]
+    period_str = '{}'.format(rankMonth)
 
   chart_name = 'melon_{}_'.format(period_type)\
                + period_str.replace('\r\n', '').replace('\t', '').replace(' ~ ', '-')
   debug.log(chart_name)
 
   table = soup.find(style='width:100%')
-#  debug.log(table)
+  # debug.log(table)
   debug.log('')
   count = 1
   chart_list = []
-  for music in table.find_all('tr'):
+  for music in table.find_all('tr', {'class':'lst50'}):
     if count > maxRank:
       break
     image = music.find('img')
@@ -183,7 +187,7 @@ def getMelonChart(maxRank = 50, period_type ='weekly', str_target_date=None):
       debug.log('{:02}. {} - {} (id:{}, {})'.format(count, artist, title, songID, coverImgFile))
       chart_list.append({'rank':count, 'artist':artist, 'title':title,
                          'songID':songID, 'albumID':albumID, 'lyric':lyric})
-#      debug.log(lyric)
+      # debug.log(lyric)
       count += 1
   return chart_name, chart_list
 
