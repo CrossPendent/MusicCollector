@@ -134,7 +134,7 @@ def getMelonChart(maxRank = 50, period_type ='weekly', str_target_date=None):
     maxRank = 1
   elif maxRank > 50:
     maxRank = 50
-  if str_target_date == None:
+  if str_target_date == None or str_target_date == '':
     if period_type == 'weekly':
       str_target_date = (date.today() - timedelta(days=date.today().isoweekday())).strftime('%Y%m%d')
     else:
@@ -157,7 +157,7 @@ def getMelonChart(maxRank = 50, period_type ='weekly', str_target_date=None):
     rankMonth = target_date.strftime(strTimeFormat)
     url_param = 'rankMonth={}&'.format(rankMonth)
   url = "http://www.melon.com/chart/{}/index.htm?{}moved=Y".format(period_url[period_type], url_param)
-  debug.log("Request chart to melon by query'{}'".format(url))
+  debug.log("Request chart to melon by query < {} >".format(url))
   content = http.getHTMLDocument(url)
   # debug.log(content)
 

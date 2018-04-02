@@ -24,7 +24,7 @@ else:
 
 def main():
   debug.log('Collecting the chart information from Melon...')
-  chart_name, chart = cc.getMelonChart(FLAGS.rank)
+  chart_name, chart = cc.getMelonChart(maxRank=FLAGS.rank, period_type=FLAGS.period, str_target_date=FLAGS.date)
   #  debug.log(chart)
   try:
     playList = PlayListCreater(PLAYLISTS_DIR, chart_name, FLAGS.refresh_list)
@@ -56,5 +56,5 @@ if __name__ == '__main__':
   parser.add_argument('-o', '--overwrite-files', action='store_true',
                       help='overwrites the audio file when the same file is found.')
   FLAGS = parser.parse_args()
-  print(FLAGS)
+  print('excution parameters: ', FLAGS)
   main()
