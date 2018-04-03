@@ -35,13 +35,15 @@ def find_youtube_detailed(query):
   watch_list = []
   for link in soup.find_all('h3', {'class':'yt-lockup-title'}):
     # debug.log(link)
-    length_keyword = ' - Duration: '
-    length_info = link.find('span').contents[0]
-    if length_info.find(length_keyword) >= 0:
-      record = {'title':link.find('a').contents[0],
-                'length':length_info.replace(length_keyword, ''),
-                'url':base_url + link.find('a').attrs['href']}
-      watch_list.append(record)
+    span_contents = link.find('span').contents
+    if len(span_contents) > 0:
+      length_info = span_contents[0]
+      length_keyword = ' - Duration: '
+      if length_info.find(length_keyword) >= 0:
+        record = {'title':link.find('a').contents[0],
+                  'length':length_info.replace(length_keyword, ''),
+                  'url':base_url + link.find('a').attrs['href']}
+        watch_list.append(record)
   return watch_list
 
 def find_youtube(query):
