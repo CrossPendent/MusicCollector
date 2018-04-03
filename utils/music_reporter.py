@@ -57,4 +57,4 @@ if __name__ == '__main__':
   # mr = MusicReporter('.', 'test.log')
   # mr.updateMusic('abd', 'http://adb.com')
   # del mr
-  generateReportFromDebugLog('..\logs', 'debuglog.log', 'report.log')
+  generateReportFromDebugLog(os.path.join('..', 'logs'), 'debuglog.log', 'report.log')
