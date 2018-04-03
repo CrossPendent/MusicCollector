@@ -47,10 +47,10 @@ def repair_music():
   debug.log('Looking for youtube by the query \'{}\''.format(query))
   list = ye.find_youtube_detailed(query)
 
-  count = 1
+  count = 0
   for link in list:
-    debug.log("[{}] title:'{}', length:{}, link:< {} >".format(count, link['title'], link['length'], link['url']))
     count += 1
+    debug.log("[{}] title:'{}', length:{}, link:< {} >".format(count, link['title'], link['length'], link['url']))
 
   selected_num = -1
 
