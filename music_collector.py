@@ -39,7 +39,7 @@ def main():
           song['rank'], song['artist'], song['title'], song['songID'], song['albumID']))
       audio_file_path = ye.getSongFromYouTube(
         song['artist'], song['title'], song['songID'], song['lyric'], song['albumID'], MUSIC_FILE_DIR, IMAGE_DIR,
-        FLAGS.overwrite_files, music_reporter=mr)
+        FLAGS.overwrite_songs, music_reporter=mr)
       playList.storePlayList(MUSIC_FILE_DIR, audio_file_path)
     del playList
     del mr

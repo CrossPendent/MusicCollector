@@ -164,12 +164,11 @@ def getMelonChart(maxRank = 50, period_type ='weekly', str_target_date=None):
   soup = BeautifulSoup(content, "html.parser")
   # debug.log(soup)
   if(period_type == 'weekly'):
-    period_str = '{}-{}'.format(startDay.strftime(strTimeFormat), endDay.strftime(strTimeFormat))
+    period_str = '{}-{}'.format(startDay.strftime('%Y.%m.%d'), endDay.strftime('%Y.%m.%d'))
   else:
-    period_str = '{}'.format(rankMonth)
+    period_str = '{}'.format(target_date.strftime('%Y.%m'))
 
-  chart_name = 'melon_{}_'.format(period_type)\
-               + period_str.replace('\r\n', '').replace('\t', '').replace(' ~ ', '-')
+  chart_name = 'melon_{}_'.format(period_type) + period_str
   debug.log(chart_name)
 
   table = soup.find(style='width:100%')
