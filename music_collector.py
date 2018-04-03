@@ -15,7 +15,7 @@ if _TEST_MODE_ON_WINDOWS_:
   IMAGE_DIR = 'cover_img'
   MUSIC_FILE_DIR = 'music_files'
   PLAYLISTS_DIR = MUSIC_FILE_DIR
-  MAX_RANK = 20
+  MAX_RANK = 10
 else:
   IMAGE_DIR = 'temp/melon_cover_img'
   MUSIC_FILE_DIR = '/volume1/music/melon_chart'
@@ -55,7 +55,7 @@ if __name__ == '__main__':
                       help='maximum rank as you want to get from chart (1<=RANK<=50) (default={})'.format(MAX_RANK))
   parser.add_argument('-l', '--refresh-list', action='store_true',
                       help='overwrites the playlist when the same list is found.')
-  parser.add_argument('-o', '--overwrite-files', action='store_true',
+  parser.add_argument('-o', '--overwrite-songs', action='store_true',
                       help='overwrites the audio file when the same file is found.')
   FLAGS = parser.parse_args()
   print('excution parameters: ', FLAGS)
