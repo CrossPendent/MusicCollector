@@ -5,7 +5,7 @@ from subfuncs.playlist import PlayListCreater
 import argparse
 import sys
 
-from utils import debug
+from utils import debug, music_reporter
 
 FLAGS = None
 
@@ -32,15 +32,17 @@ def main():
     debug.log('Chart file(\'{}.m3u\') already exsits.'.format(chart_name))
   else:
     debug.log('\nMaking the MP3 files...')
+    mr = music_reporter.MusicReporter('logs', 'report.log')
     for song in chart:
       debug.log(
         'rank:{:02}, artist:{}, title:{}, songID:{}, albumID:{}'.format(
           song['rank'], song['artist'], song['title'], song['songID'], song['albumID']))
       audio_file_path = ye.getSongFromYouTube(
         song['artist'], song['title'], song['songID'], song['lyric'], song['albumID'], MUSIC_FILE_DIR, IMAGE_DIR,
-        FLAGS.overwrite_files)
+        FLAGS.overwrite_files, music_reporter=mr)
       playList.storePlayList(MUSIC_FILE_DIR, audio_file_path)
     del playList
+    del mr
     debug.log('\nMusic Collecting and Creating chart are done.')
 
 if __name__ == '__main__':

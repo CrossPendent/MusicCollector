@@ -4,7 +4,7 @@ import os
 import argparse
 
 from subfuncs import youtube_explorer as ye
-from utils import debug
+from utils import debug, music_reporter
 
 from mutagen.mp3 import MP3
 from mutagen.id3 import ID3
@@ -74,8 +74,10 @@ def repair_music():
     debug.log('Previous old mp3 file is removed.')
   os.rename(FLAGS.path, old_file_path)
   debug.log("The name of previous file is changed to '{}'".format(old_filename))
-
-  output_filename = ye.download_audio_from_youtube(list[selected_num-1]['url'], output_dir=target_dir, strQuery=audio_name)
+  mr = music_reporter.MusicReporter('logs', 'report.log')
+  output_filename = ye.download_audio_from_youtube(list[selected_num-1]['url'], output_dir=target_dir,
+                                                   strQuery=audio_name, music_reporter=mr)
+  del mr
   debug.log('\'' + output_filename + '\' was downloaded.')
   debug.log('\'' + output_filename + '\' is converting...')
   ye.convertMP3(target_dir, output_filename, audio_name+'.mp3')

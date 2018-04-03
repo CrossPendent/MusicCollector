@@ -6,7 +6,7 @@ import subprocess
 from bs4 import BeautifulSoup
 import urllib.parse
 from pytube import YouTube
-from utils import http, debug
+from utils import http, debug, music_reporter
 from subfuncs import chart_crawler as cc
 
 from mutagen.mp3 import MP3
@@ -56,8 +56,10 @@ def find_youtube(query):
     watch_urls.append(base_url + link.find('a').attrs['href'])
   return watch_urls
 
-def download_audio_from_youtube(url, output_dir, strQuery):
+def download_audio_from_youtube(url, output_dir, strQuery, music_reporter):
   debug.log('\'{}\' will be downloaded from \'{}\''.format(strQuery, url))
+  if music_reporter != None:
+    music_reporter.updateMusic(strQuery, url)
   yt = YouTube(url)
   audio_list = yt.streams.filter(only_audio=True).all()
   if audio_list == []:
@@ -164,7 +166,8 @@ def convertMP3(baseDIR, old_filename, new_filename):
     subprocess.call(['ffmpeg', '-i', old_path, mp3_path])
     os.remove(old_path)
 
-def getSongFromYouTube(artist, title, songID, lyric, albumID, baseMusicDir, baseImageDir, isOverwriteMode=False):
+def getSongFromYouTube(artist, title, songID, lyric, albumID, baseMusicDir, baseImageDir,
+                       isOverwriteMode=False, music_reporter=None):
   audio_name = '{}-{}'.format(artist, title)
   query = '{} audio'.format(audio_name)
   debug.log('Looking for youtube by the query \'{}\''.format(query))
@@ -192,7 +195,7 @@ def getSongFromYouTube(artist, title, songID, lyric, albumID, baseMusicDir, base
       debug.log('{} is already exist. Downloading will be skipped.'.format(mp3_path))
       isSkip = True
   if not isSkip:
-    file_name = download_audio_from_youtube(list[0], baseMusicDir, audio_name)
+    file_name = download_audio_from_youtube(list[0], baseMusicDir, audio_name, music_reporter)
     debug.log('\'' + file_name + '\' was downloaded.')
     debug.log('\'' + file_name + '\' is converting...')
     convertMP3(baseMusicDir, file_name, mp3_path)
