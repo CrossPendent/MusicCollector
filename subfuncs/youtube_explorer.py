@@ -60,7 +60,7 @@ def find_youtube(query):
   return watch_urls
 
 def download_audio_from_youtube(url, output_dir, strQuery, music_reporter):
-  debug.log('\'{}\' will be downloaded from \'{}\''.format(strQuery, url))
+  debug.log('\'{}\' is downloading from \'{}\'...'.format(strQuery, url))
   if music_reporter != None:
     music_reporter.updateMusic(strQuery, url)
   yt = YouTube(url)
@@ -173,9 +173,9 @@ def getSongFromYouTube(artist, title, songID, lyric, albumID, baseMusicDir, base
                        isOverwriteMode=False, music_reporter=None):
   audio_name = '{}-{}'.format(artist, title)
   query = '{} audio'.format(audio_name)
-  debug.log('Looking for youtube by the query \'{}\''.format(query))
+  debug.log('Looking for youtube by the query \'{}\'...'.format(query))
   list = find_youtube(query)
-  debug.log('\'' + query + '\' is downloading.')
+  debug.log('\'' + query + '\' will be downloading.')
 
   if not os.path.exists(baseMusicDir):
     os.mkdir(baseMusicDir)
