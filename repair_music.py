@@ -50,7 +50,7 @@ def repair_music():
   count = 0
   for link in list:
     count += 1
-    debug.log("[{}] title:'{}', length:{}, link:< {} >".format(count, link['title'], link['length'], link['url']))
+    print("[{}] title:'{}', length:{}, link:< {} >".format(count, link['title'], link['length'], link['url']))
 
   selected_num = -1
 
@@ -64,9 +64,9 @@ def repair_music():
     if selected_num == 0:
       return
     if selected_num < 0 or selected_num > count:
-      debug.log('Input number is out of range (0<=NUM<={}). Try to input again.'.count())
+      print('Input number is out of range (0<=NUM<={}). Try to input again.'.count())
 
-  debug.log("\n[{}]({}<{}>) is selected.".format(selected_num, list[selected_num-1]['title'], list[selected_num-1]['url']))
+  print("\n[{}]({}<{}>) is selected.".format(selected_num, list[selected_num-1]['title'], list[selected_num-1]['url']))
   old_filename = "{}_old.mp3".format(audio_name)
   old_file_path = os.path.join(target_dir, old_filename)
   if os.path.exists(old_file_path):
