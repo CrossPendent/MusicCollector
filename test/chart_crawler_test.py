@@ -31,7 +31,8 @@ class ChartCrawlerTest(unittest.TestCase):
     print(cc.getSongInfobySongIDOfMelon('30403595'))
 
   def testGetMelonChart(self):
-    listChart = cc.getMelonChart(maxRank=10, period_type='monthly', str_target_date='20170201')
+    # listChart = cc.getMelonChart(maxRank=10, period_type='weekly', str_target_date='20170201')
+    listChart = cc.getMelonChart(maxRank=10, period_type='monthly')
     for song in listChart:
       print(song)
 

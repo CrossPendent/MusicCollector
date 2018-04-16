@@ -4,7 +4,7 @@ import os
 import argparse
 
 from subfuncs import youtube_explorer as ye
-from utils import debug
+from utils import debug, music_reporter
 
 from mutagen.mp3 import MP3
 from mutagen.id3 import ID3
@@ -47,10 +47,10 @@ def repair_music():
   debug.log('Looking for youtube by the query \'{}\''.format(query))
   list = ye.find_youtube_detailed(query)
 
-  count = 1
+  count = 0
   for link in list:
-    debug.log("[{}] title:'{}', length:{}, link:< {} >".format(count, link['title'], link['length'], link['url']))
     count += 1
+    print("[{}] title:'{}', length:{}, link:< {} >".format(count, link['title'], link['length'], link['url']))
 
   selected_num = -1
 
@@ -64,9 +64,9 @@ def repair_music():
     if selected_num == 0:
       return
     if selected_num < 0 or selected_num > count:
-      debug.log('Input number is out of range (0<=NUM<={}). Try to input again.'.count())
+      print('Input number is out of range (0<=NUM<={}). Try to input again.'.count())
 
-  debug.log("\n[{}]({}<{}>) is selected.".format(selected_num, list[selected_num-1]['title'], list[selected_num-1]['url']))
+  print("\n[{}]({}<{}>) is selected.".format(selected_num, list[selected_num-1]['title'], list[selected_num-1]['url']))
   old_filename = "{}_old.mp3".format(audio_name)
   old_file_path = os.path.join(target_dir, old_filename)
   if os.path.exists(old_file_path):
@@ -74,8 +74,10 @@ def repair_music():
     debug.log('Previous old mp3 file is removed.')
   os.rename(FLAGS.path, old_file_path)
   debug.log("The name of previous file is changed to '{}'".format(old_filename))
-
-  output_filename = ye.download_audio_from_youtube(list[selected_num-1]['url'], output_dir=target_dir, strQuery=audio_name)
+  mr = music_reporter.MusicReporter('logs', 'report.log')
+  output_filename = ye.download_audio_from_youtube(list[selected_num-1]['url'], output_dir=target_dir,
+                                                   strQuery=audio_name, music_reporter=mr)
+  del mr
   debug.log('\'' + output_filename + '\' was downloaded.')
   debug.log('\'' + output_filename + '\' is converting...')
   ye.convertMP3(target_dir, output_filename, audio_name+'.mp3')
