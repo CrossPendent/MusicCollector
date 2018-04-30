@@ -48,10 +48,12 @@ def getSongInfobySongIDOfMelon(melon_songID):
 
   albumID = soup.find('dl', {'class':'list'}).find('a')['href'].split('\'')[1]
 
-  return lyric, artist, title, albumID
+  imageUrl = soup.find('a', {'class':'image_typeAll'}).find('img')['src'].split('?')[0]
+
+  return lyric, artist, title, albumID, imageUrl
 
 def getLyricFromMelon(melon_songID):
-  lyric, _, _, _  = getSongInfobySongIDOfMelon(melon_songID)
+  lyric, _, _, _, _  = getSongInfobySongIDOfMelon(melon_songID)
   return lyric
 
 def getAlbumInfoFromMelon(melon_albumID):
@@ -191,6 +193,12 @@ def getMelonChart(maxRank = 50, period_type ='weekly', str_target_date=None):
   return chart_name, chart_list
 
 if __name__ == '__main__':
-  chartlist = getMelonChart()
-  for song in chartlist:
-    debug.log(song)
+  lyric, artist, title, albumID, imgUrl = getSongInfobySongIDOfMelon('30989550')
+  print(lyric)
+  print(artist)
+  print(title)
+  print(albumID)
+  print(imgUrl)
+  # chartlist = getMelonChart()
+  # for song in chartlist:
+  #   debug.log(song)
