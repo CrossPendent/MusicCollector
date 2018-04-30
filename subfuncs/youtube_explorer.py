@@ -64,11 +64,17 @@ def download_audio_from_youtube(url, output_dir, strQuery, music_reporter):
   if music_reporter != None:
     music_reporter.updateMusic(strQuery, url)
   yt = YouTube(url)
+  filename = convertQueryToFilename(strQuery)
   audio_list = yt.streams.filter(only_audio=True).all()
   if audio_list == []:
     audio_list = yt.streams.filter().all()
-  filename = convertQueryToFilename(strQuery)
-  audio_list[0].download(output_dir, filename)
+    for stream in audio_list:
+      # print(stream)
+      if stream.mime_type.find('mp4') >= 0:
+        stream.download(output_dir, filename)
+        break;
+  else:
+    audio_list[0].download(output_dir, filename)
   return (filename + '.mp4')
 
 def setID3(baseDIR, filename, artist, title, lyric, albumID, cover_img_path):

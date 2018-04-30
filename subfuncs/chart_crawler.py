@@ -25,15 +25,16 @@ def getSongInfobySongIDOfMelon(melon_songID):
   soup = BeautifulSoup(content, "html.parser")
 
   # parse lyric
-  raw_lyric = soup.find('div', {'class':'lyric'}).contents[1:]
-  raw_lyric[0] = raw_lyric[0].replace('\r\n\t\t\t\t\t\t\t\t', '')
-
+  lyric_soup = soup.find('div', {'class':'lyric'})
   lyric = ''
-  for line in raw_lyric:
-    if str(line) == '<br/>':
-      lyric = lyric + '\r\n'
-    else:
-      lyric = lyric + str(line)
+  if lyric_soup != None:
+    raw_lyric = lyric_soup.contents[1:]
+    raw_lyric[0] = raw_lyric[0].replace('\r\n\t\t\t\t\t\t\t\t', '')
+    for line in raw_lyric:
+      if str(line) == '<br/>':
+        lyric = lyric + '\r\n'
+      else:
+        lyric = lyric + str(line)
 
   # parse other information
   title = soup.find('div', {'class':'song_name'}).contents[-1].replace('\r\n', '').replace('\t', '')
