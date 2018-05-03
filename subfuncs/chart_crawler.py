@@ -194,7 +194,14 @@ def getMelonChart(maxRank = 50, period_type ='weekly', str_target_date=None):
     strMonthFormat = '%m'
     rankYear = target_date.strftime(strYearFormat)
     rankMonth = target_date.strftime(strMonthFormat)
-    url_param = 'chartType=MO&year={}&mon={}&classCd=DP0000'.format(rankYear, rankMonth)
+    if target_date.year < 2017:
+      if target_date < date(2004, 11, 1):
+        classCd = 'KPOP'
+      else:
+        classCd = 'DP0000'
+    else:
+      classCd = 'GN0000'
+    url_param = 'chartType=MO&year={}&mon={}&classCd={}'.format(rankYear, rankMonth, classCd)
   url = "http://www.melon.com/chart/search/list.htm?{}&moved=Y".format(url_param)
   debug.log("Request chart to melon by query < {} >".format(url))
   content = http.getHTMLDocument(url)
@@ -237,7 +244,7 @@ if __name__ == '__main__':
   # print(albumID)
   # print(imgUrl)
   # chartlist = getMelonChart()
-  # chartlist = getMelonChart(period_type='monthly', str_target_date='20150101')
-  chartlist = getMelonChart(period_type='weekly', str_target_date='20041120')
+  chartlist = getMelonChart(period_type='monthly', str_target_date='19901001')
+  # chartlist = getMelonChart(period_type='weekly', str_target_date='20041120')
   for song in chartlist:
     debug.log(song)
