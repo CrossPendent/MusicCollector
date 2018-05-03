@@ -84,11 +84,11 @@ def getAlbumInfoFromMelon(melon_albumID):
 def getSongInfoOfMelon(music_record):
   soupArtist = music_record.find('div', {'class':'ellipsis rank02'})
   soupTitle = music_record.find('div', {'class':'ellipsis rank01'})
-  soupSongInfo = music_record.find('a', {'class':'btn button_icons type03 song_info'})
+  soupSongInfo = music_record.find('a', {'class':'btn btn_icon_detail'})
   soupAlbumInfo = music_record.find('div', {'class':'ellipsis rank03'})
 
-  debug.log('=========')
-  debug.log('soupArtist')
+  # debug.log('=========')
+  # debug.log('soupArtist')
   artist = ''
   # debug.log(soupArtist)
   artistCount = 0
@@ -97,19 +97,23 @@ def getSongInfoOfMelon(music_record):
       artist += ','
     artist += art.contents[0]
     artistCount += 1
-  debug.log(artist)
-  debug.log('soupTitle')
+  # debug.log(artist)
+  # debug.log('soupTitle')
   # debug.log(soupTitle)
-  title = soupTitle.find('a').contents[0]
-  debug.log(title)
-  debug.log('soupSongInfo')
+  if soupTitle.find('a') == None:
+    title = soupTitle.find('span', {'class':'fc_lgray'}).contents[0]
+  else:
+    title = soupTitle.find('a').contents[0]
+  # debug.log(title)
+  # debug.log('soupSongInfo')
   # debug.log(soupSongInfo)
   songID = soupSongInfo['href'].replace('javascript:melon.link.goSongDetail(\'', '').replace('\');', '')
-  debug.log(songID)
-  debug.log('soupAlbumInfo')
+  # debug.log(songID)
+  # debug.log('soupAlbumInfo')
   # debug.log(soupAlbumInfo)
   albumID = soupAlbumInfo.find('a')['href'].replace('javascript:melon.link.goAlbumDetail(\'', '').replace('\');', '')
-  debug.log(albumID)
+  # debug.log(albumID)
+  debug.log('parsed the music detail (artist: {}, title: {}, songID: {}, albumID: {})'.format(artist, title, songID, albumID))
   '''
   links = music_record.find_all('a')
   if len(links) < 4:
@@ -130,6 +134,12 @@ def getSongInfoOfMelon(music_record):
 
   return artist, title, songID, coverImgFile, lyric, albumID
 
+def isWeekStartedFromSunday(target_date):
+  result = False
+  if date(2007, 7, 15) <= target_date < date(2012, 8, 13) or target_date < date(2004, 11, 22):
+    result = True
+  return result
+
 def getMelonChart(maxRank = 50, period_type ='weekly', str_target_date=None):
   period_url = {'daily': 'day', 'weekly': 'week', 'monthly': 'month'}
 
@@ -148,18 +158,44 @@ def getMelonChart(maxRank = 50, period_type ='weekly', str_target_date=None):
                      int(str_target_date[4:6]),
                      int(str_target_date[6:8]))
 
+  if target_date < date(1990, 1, 7):
+    target_date = date(1990, 1, 7)
+  elif target_date > date.today():
+    target_date = date.today()
+
   if period_type == 'weekly':
     strTimeFormat = '%Y%m%d'
-    startDay = target_date - timedelta(days=target_date.weekday())
+    if isWeekStartedFromSunday(target_date):
+      startDay = target_date - timedelta(days=target_date.isoweekday()%7)
+    else:
+      startDay = target_date - timedelta(days=target_date.weekday())
     endDay = startDay + timedelta(days=6)
-    url_param = 'startDay={}&endDay={}&'.format(
-      startDay.strftime(strTimeFormat), endDay.strftime(strTimeFormat)
+    if not isWeekStartedFromSunday(startDay) and isWeekStartedFromSunday(endDay):
+      endDay = endDay - timedelta(days=1)
+    if isWeekStartedFromSunday(startDay) and not isWeekStartedFromSunday(endDay):
+      target_date = target_date - timedelta(days=1)
+      startDay = target_date - timedelta(days=target_date.isoweekday()%7)
+      endDay = startDay + timedelta(days=6)
+    if target_date.year < 2017:
+      if target_date < date(2009, 11, 1):
+        if target_date < date(2004, 11, 22):
+          classCd = 'KPOP'
+        else:
+          classCd = 'CL0000'
+      else:
+        classCd = 'DP0000'
+    else:
+      classCd = 'GN0000'
+    url_param = 'chartType=WE&classCd={}&startDay={}&endDay={}'.format(
+      classCd, startDay.strftime(strTimeFormat), endDay.strftime(strTimeFormat)
     )
   else:
-    strTimeFormat = '%Y%m'
-    rankMonth = target_date.strftime(strTimeFormat)
-    url_param = 'rankMonth={}&'.format(rankMonth)
-  url = "http://www.melon.com/chart/{}/index.htm?{}moved=Y".format(period_url[period_type], url_param)
+    strYearFormat = '%Y'
+    strMonthFormat = '%m'
+    rankYear = target_date.strftime(strYearFormat)
+    rankMonth = target_date.strftime(strMonthFormat)
+    url_param = 'chartType=MO&year={}&mon={}&classCd=DP0000'.format(rankYear, rankMonth)
+  url = "http://www.melon.com/chart/search/list.htm?{}&moved=Y".format(url_param)
   debug.log("Request chart to melon by query < {} >".format(url))
   content = http.getHTMLDocument(url)
   # debug.log(content)
@@ -174,7 +210,7 @@ def getMelonChart(maxRank = 50, period_type ='weekly', str_target_date=None):
   chart_name = 'melon_{}_'.format(period_type) + period_str
   debug.log(chart_name)
 
-  table = soup.find(style='width:100%')
+  table = soup.find('tbody', {'id':'chartListObj'})
   # debug.log(table)
   debug.log('')
   count = 1
@@ -182,7 +218,7 @@ def getMelonChart(maxRank = 50, period_type ='weekly', str_target_date=None):
   for music in table.find_all('tr', {'class':'lst50'}):
     if count > maxRank:
       break
-    image = music.find('img')
+    # image = music.find('img')
     links = music.find_all('a')
     if len(links) > 3:
       artist , title, songID, coverImgFile, lyric, albumID = getSongInfoOfMelon(music)
@@ -194,12 +230,14 @@ def getMelonChart(maxRank = 50, period_type ='weekly', str_target_date=None):
   return chart_name, chart_list
 
 if __name__ == '__main__':
-  lyric, artist, title, albumID, imgUrl = getSongInfobySongIDOfMelon('30989550')
-  print(lyric)
-  print(artist)
-  print(title)
-  print(albumID)
-  print(imgUrl)
+  # lyric, artist, title, albumID, imgUrl = getSongInfobySongIDOfMelon('30989550')
+  # print(lyric)
+  # print(artist)
+  # print(title)
+  # print(albumID)
+  # print(imgUrl)
   # chartlist = getMelonChart()
-  # for song in chartlist:
-  #   debug.log(song)
+  # chartlist = getMelonChart(period_type='monthly', str_target_date='20150101')
+  chartlist = getMelonChart(period_type='weekly', str_target_date='20041120')
+  for song in chartlist:
+    debug.log(song)

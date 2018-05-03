@@ -7,7 +7,7 @@ from utils import debug
 
 
 def getHTMLDocument(url, autoRetry=True):
-  listAgent = ['Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3325.181 Safari/537.36']
+  listAgent = ['Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/66.0.3359.139 Safari/537.36']
   retryDelay = [0.1, 0.5, 1, 2, 5, 10, 30, 60, 180, 300]
   conLoop = True
   agentCount = 0
@@ -16,11 +16,14 @@ def getHTMLDocument(url, autoRetry=True):
     opener = urllib.request.build_opener()
     opener.addheaders = [('Host', 'www.melon.com'),
                          ('Connection', 'Keep-Alive'),
-                         ('Upgrade-Insecure-Requests', '1'),
+                         # ('Upgrade-Insecure-Requests', '1'),
                          ('User_agent', listAgent[agentCount]),
-                         ('Accept', 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8'),
+                         ('X-Requested-With', 'XMLHttpRequest'),
+                         ('Accept', '*/*'),
+                         # ('Accept-Encoding', 'gzip, deflate'),
                          ('Accept-Language', 'en-US,en;q=0.9,ko-KR;q=0.8,ko;q=0.7'),
-                         ("Content-Type", "application/x-www-form-urlencoded;charset=utf-8")]
+                         ("Content-Type", "application/x-www-form-urlencoded;charset=utf-8"),
+                         ('Cookie', 'SCOUTER=z39vkmg7pd9j91; PCID=15250529259645155634188; WMONID=GxTfcjDmib7; POC=WP10')]
     try:
       html = opener.open(url)
     except ConnectionResetError as e:
