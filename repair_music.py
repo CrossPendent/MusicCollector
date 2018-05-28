@@ -67,7 +67,7 @@ def repair_music():
       print('Input number is out of range (0<=NUM<={}). Try to input again.'.count())
 
   print("\n[{}]({}<{}>) is selected.".format(selected_num, list[selected_num-1]['title'], list[selected_num-1]['url']))
-  old_filename = "{}_old.mp3".format(audio_name)
+  old_filename = "{}_old.mp3".format(filename.split('.mp3')[0])
   old_file_path = os.path.join(target_dir, old_filename)
   if os.path.exists(old_file_path):
     os.remove(old_file_path)
@@ -75,8 +75,9 @@ def repair_music():
   os.rename(FLAGS.path, old_file_path)
   debug.log("The name of previous file is changed to '{}'".format(old_filename))
   mr = music_reporter.MusicReporter('logs', 'report.log')
+  conv_filename = ye.convertQueryToFilename(audio_name)
   output_filename = ye.download_audio_from_youtube(list[selected_num-1]['url'], output_dir=target_dir,
-                                                   strQuery=audio_name, music_reporter=mr)
+                                                   strQuery=conv_filename, music_reporter=mr)
   del mr
   debug.log('\'' + output_filename + '\' was downloaded.')
   debug.log('\'' + output_filename + '\' is converting...')
