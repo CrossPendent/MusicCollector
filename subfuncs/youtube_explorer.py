@@ -183,7 +183,7 @@ def getSongFromYouTube(artist, title, songID, lyric, albumID, baseMusicDir, base
   debug.log('Looking for youtube by the query \'{}\'...'.format(query))
   list = find_youtube(query)
   retry = 0
-  while list is None and retry < 5:
+  while len(list) <= 1 and retry < 5:
     debug.log('Youtube list couldn\'t be gotten. retry...')
     list = find_youtube(query)
     retry += 1
