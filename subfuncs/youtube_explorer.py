@@ -49,11 +49,12 @@ def find_youtube_detailed(query):
 def find_youtube(query):
   base_url = 'https://www.youtube.co.kr'
   req_url = base_url + '/results?search_query=' + urllib.parse.quote(query)
+  debug.log(req_url)
   response = http.getHTMLDocument(req_url)
   #debug.log(response)
 
   soup = BeautifulSoup(response, "html.parser")
-  #debug.log(soup)
+  # debug.log(soup)
   watch_urls = []
   for link in soup.find_all('h3', {'class':'yt-lockup-title'}):
     watch_urls.append(base_url + link.find('a').attrs['href'])
@@ -181,6 +182,11 @@ def getSongFromYouTube(artist, title, songID, lyric, albumID, baseMusicDir, base
   query = '{} audio'.format(audio_name)
   debug.log('Looking for youtube by the query \'{}\'...'.format(query))
   list = find_youtube(query)
+  retry = 0
+  while list is None and retry < 5:
+    debug.log('Youtube list couldn\'t be gotten. retry...')
+    list = find_youtube(query)
+    retry += 1
   debug.log('trying to download \'' + query + '\'...')
 
   if not os.path.exists(baseMusicDir):
@@ -217,6 +223,8 @@ def getSongFromYouTube(artist, title, songID, lyric, albumID, baseMusicDir, base
   return mp3_path
 
 if __name__ == '__main__':
+  print(find_youtube('볼빨간사춘기-여행 audio'))
+  # print(download_audio_from_youtube('https://www.youtube.co.kr/watch?v=a7Kl_A6Hce8', './', '볼빨간사춘기-여행', None))
   lyric = u'''
   abc
   deb
