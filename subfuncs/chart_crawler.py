@@ -141,7 +141,7 @@ def isWeekStartedFromSunday(target_date):
   return result
 
 def getMelonChart(maxRank = 50, period_type ='weekly', str_target_date=None):
-  period_url = {'daily': 'day', 'weekly': 'week', 'monthly': 'month'}
+  period_url = {'weekly': 'week', 'monthly': 'month', 'yearly': '', 'decennial': ''}
 
   if maxRank < 1:
     maxRank = 1
@@ -151,9 +151,9 @@ def getMelonChart(maxRank = 50, period_type ='weekly', str_target_date=None):
     if period_type == 'weekly':
       str_target_date = (date.today() - timedelta(days=date.today().isoweekday())).strftime('%Y%m%d')
     else:
-      str_target_date = (date.today() - timedelta(days=date.today().day)).strftime('%Y%m%d')
+      str_target_date = date.today().strftime('%Y%m%d')
 
-  debug.log(str_target_date)
+  debug.log('target date={}'.format(str_target_date))
   target_date = date(int(str_target_date[0:4]),
                      int(str_target_date[4:6]),
                      int(str_target_date[6:8]))
@@ -189,9 +189,13 @@ def getMelonChart(maxRank = 50, period_type ='weekly', str_target_date=None):
     url_param = 'chartType=WE&classCd={}&startDay={}&endDay={}'.format(
       classCd, startDay.strftime(strTimeFormat), endDay.strftime(strTimeFormat)
     )
-  else:
+    period_str = '{}-{}'.format(startDay.strftime('%Y.%m.%d'), endDay.strftime('%Y.%m.%d'))
+  elif period_type == 'monthly':
     strYearFormat = '%Y'
     strMonthFormat = '%m'
+    today = date.today()
+    if target_date.year == today.year and target_date.month == today.month:
+      target_date = (target_date.replace(day=1) - timedelta(days=1)).replace(day=1)
     rankYear = target_date.strftime(strYearFormat)
     rankMonth = target_date.strftime(strMonthFormat)
     if target_date.year < 2017:
@@ -202,6 +206,29 @@ def getMelonChart(maxRank = 50, period_type ='weekly', str_target_date=None):
     else:
       classCd = 'GN0000'
     url_param = 'chartType=MO&year={}&mon={}&classCd={}'.format(rankYear, rankMonth, classCd)
+    period_str = '{}'.format(target_date.strftime('%Y.%m'))
+  elif period_type == 'yearly':
+    strYearFormat = '%Y'
+    today = date.today()
+    if target_date.year >= today.year:
+      target_date = target_date.replace(year=today.year-1, month=1, day=1)
+    rankYear = target_date.strftime(strYearFormat)
+    classCd = 'KPOP'
+    url_param = 'chartType=YE&year={}&classCd={}'.format(rankYear, classCd)
+    period_str = '{}'.format(target_date.strftime('%Y'))
+  else:
+    # decennial
+    strYearFormat = '%Y'
+    today = date.today()
+    today = today.replace(year=(today.year // 10) * 10, month=1, day=1)
+
+    target_date = target_date.replace(year=(target_date.year // 10) * 10, month=1, day=1)
+    if target_date >= today:
+      target_date = target_date.replace(year=today.year-10, month=1, day=1)
+    rankYear = target_date.strftime(strYearFormat)
+    classCd = 'KPOP'
+    url_param = 'chartType=AG&age={}&classCd={}'.format(rankYear, classCd)
+    period_str = '{}s'.format(target_date.strftime('%Y'))
   url = "http://www.melon.com/chart/search/list.htm?{}&moved=Y".format(url_param)
   debug.log("Request chart to melon by query < {} >".format(url))
   content = http.getHTMLDocument(url)
@@ -209,10 +236,6 @@ def getMelonChart(maxRank = 50, period_type ='weekly', str_target_date=None):
 
   soup = BeautifulSoup(content, "html.parser")
   # debug.log(soup)
-  if(period_type == 'weekly'):
-    period_str = '{}-{}'.format(startDay.strftime('%Y.%m.%d'), endDay.strftime('%Y.%m.%d'))
-  else:
-    period_str = '{}'.format(target_date.strftime('%Y.%m'))
 
   chart_name = 'melon_{}_'.format(period_type) + period_str
   debug.log(chart_name)
