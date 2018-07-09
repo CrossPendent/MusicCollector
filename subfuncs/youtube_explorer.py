@@ -51,13 +51,16 @@ def find_youtube(query):
   req_url = base_url + '/results?search_query=' + urllib.parse.quote(query)
   debug.log(req_url)
   response = http.getHTMLDocument(req_url)
-  #debug.log(response)
+  # debug.log(response)
 
   soup = BeautifulSoup(response, "html.parser")
   # debug.log(soup)
   watch_urls = []
   for link in soup.find_all('h3', {'class':'yt-lockup-title'}):
     watch_urls.append(base_url + link.find('a').attrs['href'])
+  # if len(watch_urls) < 1:
+  #   debug.log(soup)
+
   return watch_urls
 
 def download_audio_from_youtube(url, output_dir, strQuery, music_reporter):
@@ -69,13 +72,11 @@ def download_audio_from_youtube(url, output_dir, strQuery, music_reporter):
   audio_list = yt.streams.filter(only_audio=True).all()
   if audio_list == []:
     audio_list = yt.streams.filter().all()
-    for stream in audio_list:
-      # print(stream)
-      if stream.mime_type.find('mp4') >= 0:
-        stream.download(output_dir, filename)
-        break;
-  else:
-    audio_list[0].download(output_dir, filename)
+  for stream in audio_list:
+    # print(stream)
+    if stream.mime_type.find('mp4') >= 0:
+      stream.download(output_dir, filename)
+      break;
   return (filename + '.mp4')
 
 def setID3(baseDIR, filename, artist, title, lyric, albumID, cover_img_path):
