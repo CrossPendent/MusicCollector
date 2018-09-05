@@ -81,7 +81,7 @@ def repair_music():
   del mr
   debug.log('\'' + output_filename + '\' was downloaded.')
   debug.log('\'' + output_filename + '\' is converting...')
-  ye.convertMP3(target_dir, output_filename, audio_name+'.mp3')
+  ye.convertMP3(target_dir, output_filename, conv_filename+'.mp3')
   debug.log('\'' + FLAGS.path + '\' was converted.')
   setID3Tag(FLAGS.path, id3_tag)
   debug.log('Song Information was recorded on \'' + FLAGS.path + '\'')
