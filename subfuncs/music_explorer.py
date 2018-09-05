@@ -41,6 +41,7 @@ def getSongInfoFromMelonOfSearch(music_record):
 def getSearchList(artist, title):
   query = 'q={}+-+{}'.format(urllib.parse.quote(artist), urllib.parse.quote(title))
   url = 'http://www.melon.com/search/total/index.htm?{}'.format(query)
+  debug.log("send the request to melon: [{}]".format(url))
   content = http.getHTMLDocument(url)
   soup = BeautifulSoup(content, "html.parser")
 
