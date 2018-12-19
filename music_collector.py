@@ -22,6 +22,11 @@ else:
   PLAYLISTS_DIR = '/volume1/music/playlists'
   MAX_RANK = 50
 
+f = open("youtube_api_key.txt", "r")
+youtube_api_key = f.readline()
+print(youtube_api_key)
+f.close()
+
 def main():
   debug.log('Collecting the chart information from Melon...')
   chart_name, chart = cc.getMelonChart(maxRank=FLAGS.rank, period_type=FLAGS.period, str_target_date=FLAGS.date)
@@ -39,6 +44,7 @@ def main():
           song['rank'], song['artist'], song['title'], song['songID'], song['albumID']))
       audio_file_path = ye.getSongFromYouTube(
         song['artist'], song['title'], song['songID'], song['lyric'], song['albumID'], MUSIC_FILE_DIR, IMAGE_DIR,
+        youtube_api_key,
         FLAGS.overwrite_songs, music_reporter=mr)
       playList.storePlayList(MUSIC_FILE_DIR, audio_file_path)
     del playList

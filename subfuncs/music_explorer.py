@@ -85,14 +85,14 @@ def getSearchList(artist, title):
     print('There is no data ({}-{} couldn\'t be found in Melon.)'.format(artist, title))
     return None
 
-def downloadSingleMusic(songID, baseMusicDir, baseImageDir):
+def downloadSingleMusic(songID, baseMusicDir, baseImageDir, youtube_api_key):
   lyric, artist, title, albumID, imgURL = cc.getSongInfobySongIDOfMelon(songID)
   coverImgFile = cc.downloadImageFromMelon(imgURL, songID)
 
   mr = music_reporter.MusicReporter('logs', 'report.log')
 
   audio_file_path = ye.getSongFromYouTube(
-    artist, title, songID, lyric, albumID, baseMusicDir, baseImageDir, isOverwriteMode=False, music_reporter=mr)
+    artist, title, songID, lyric, albumID, baseMusicDir, baseImageDir, youtube_api_key, isOverwriteMode=False, music_reporter=mr)
   del mr
 
 if __name__ == '__main__':

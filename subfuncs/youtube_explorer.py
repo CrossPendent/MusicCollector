@@ -14,10 +14,6 @@ import requests
 from mutagen.mp3 import MP3
 from mutagen.id3 import ID3, APIC, USLT, TOPE, TIT1, TIT2, TPE1, TIPL, TPRO, TCON, TPUB, TDOR, TDRL, TALB
 
-f = open("youtube_api_key.txt", "r")
-youtube_api_key = f.readline()
-f.close()
-
 def convertQueryToFilename(strQuery):
   listTargetKeys = ['\"', '#', '$', '%', '\'', '*', ',', '.', '/', ':', '"',
                     ';', '<', '>', '?', '\\', '^', '|', '~', '\\\\']
@@ -230,7 +226,7 @@ def convertMP3(baseDIR, old_filename, new_filename):
     if ret == 0:
       os.remove(old_path)
 
-def getSongFromYouTube(artist, title, songID, lyric, albumID, baseMusicDir, baseImageDir,
+def getSongFromYouTube(artist, title, songID, lyric, albumID, baseMusicDir, baseImageDir, youtube_api_key,
                        isOverwriteMode=False, music_reporter=None):
   audio_name = '{}-{}'.format(artist, title)
   query = '{} audio'.format(audio_name)

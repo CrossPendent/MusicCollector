@@ -14,6 +14,11 @@ else:
   IMAGE_DIR = 'temp/melon_cover_img'
   MUSIC_FILE_DIR = '/volume1/music/melon_chart'
 
+f = open("youtube_api_key.txt", "r")
+youtube_api_key = f.readline()
+print(youtube_api_key)
+f.close()
+
 def main():
   if FLAGS.singer == None:
     artist = input('please input singer name: ')
@@ -27,7 +32,7 @@ def main():
   songID = me.getSearchList(artist, title)
 
   if songID != None:
-    me.downloadSingleMusic(songID, MUSIC_FILE_DIR, IMAGE_DIR)
+    me.downloadSingleMusic(songID, MUSIC_FILE_DIR, IMAGE_DIR, youtube_api_key)
 
 if __name__ == '__main__':
   parser = argparse.ArgumentParser()
