@@ -45,7 +45,7 @@ def repair_music():
   # search for youtube
   query =  '{} audio'.format(audio_name)
   debug.log('Looking for youtube by the query \'{}\''.format(query))
-  list = ye.find_youtube_detailed(query)
+  list = ye.find_youtube_detailed_by_api(query)
 
   count = 0
   for link in list:

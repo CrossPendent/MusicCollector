@@ -65,19 +65,39 @@ def find_youtube(query):
 
   return watch_urls
 
+def find_youtube_detailed_by_api(query):
+  url_list, videoId_list = find_youtube_by_api(query)
+  # debug.log(url_list)
+  watch_list = []
+
+  base_url = "https://www.googleapis.com/youtube/v3/videos?"
+  for videoId in videoId_list:
+    req_url = base_url + "id=" + videoId + "&key=AIzaSyD6YBCVQ3KlkCLDlU85b6H1LNv9fT3vH-o&part=snippet,contentDetails"
+    json_string = requests.get(req_url).text
+    data = json.loads(json_string)
+    # debug.log(data['items'][0]['snippet']['title'] + ' ' + data['items'][0]['contentDetails']['duration'])
+
+    record = {'title': data['items'][0]['snippet']['title'],
+              'length': data['items'][0]['contentDetails']['duration'],
+              'url': ('https://www.youtube.com/watch?v=' + videoId)}
+    watch_list.append(record)
+  return watch_list
+
 def find_youtube_by_api(query):
   base_url = "https://www.googleapis.com/youtube/v3/search?"
-  req_url = base_url + "part=snippet&q=" + urllib.parse.quote(query) + "&key=AIzaSyD6YBCVQ3KlkCLDlU85b6H1LNv9fT3vH-o&maxResults=50"
+  req_url = base_url + "part=snippet&q=" + urllib.parse.quote(query) + "&key=AIzaSyD6YBCVQ3KlkCLDlU85b6H1LNv9fT3vH-o&maxResults=10"
   debug.log(req_url)
   json_string = requests.get(req_url).text
   # debug.log(json_string)
   data_list = json.loads(json_string)['items']
   # debug.log(data_list)
   watch_urls = []
+  videoIds = []
   for content in data_list:
     if content['id']['kind'] == 'youtube#video':
       videoId = content['id']['videoId']
       # debug.log(content)
+      videoIds.append(videoId)
       watch_urls.append('https://www.youtube.com/watch?v=' + videoId)
 
 
@@ -89,7 +109,7 @@ def find_youtube_by_api(query):
   # # if len(watch_urls) < 1:
   # #   debug.log(soup)
 
-  return watch_urls
+  return watch_urls, videoIds
 
 def download_audio_from_youtube(url, output_dir, strQuery, music_reporter):
   debug.log('\'{}\' is downloading from \'{}\'...'.format(strQuery, url))
@@ -254,7 +274,7 @@ def getSongFromYouTube(artist, title, songID, lyric, albumID, baseMusicDir, base
   return mp3_path
 
 if __name__ == '__main__':
-  print(find_youtube_by_api('MINO (송민호) - 아낙네 audio'))
+  print(find_youtube_detailed_by_api('MINO (송민호) - 아낙네 audio'))
   # print(download_audio_from_youtube('https://www.youtube.co.kr/watch?v=a7Kl_A6Hce8', './', '볼빨간사춘기-여행', None))
   lyric = u'''
   abc
