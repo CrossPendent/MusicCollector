@@ -70,7 +70,7 @@ def find_youtube(query):
   return watch_urls
 
 def find_youtube_detailed_by_api(query, youtube_api_key):
-  url_list, videoId_list = find_youtube_by_api(query)
+  url_list, videoId_list = find_youtube_by_api(query, youtube_api_key)
   # debug.log(url_list)
   watch_list = []
 
