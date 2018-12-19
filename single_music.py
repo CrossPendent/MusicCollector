@@ -16,8 +16,7 @@ else:
 
 def main():
   f = open("youtube_api_key.txt", "r")
-  youtube_api_key = f.readline()
-  print(youtube_api_key)
+  youtube_api_key = f.readline().split()[0]
   f.close()
 
   if FLAGS.singer == None:

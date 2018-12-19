@@ -25,7 +25,7 @@ def getAudioNameFromID3(id3_tag):
 
 def repair_music():
   f = open("youtube_api_key.txt", "r")
-  youtube_api_key = f.readline()
+  youtube_api_key = f.readline().split()[0]
   f.close()
 
   filename = FLAGS.path.split(os.sep)[-1]
