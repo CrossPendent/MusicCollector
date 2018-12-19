@@ -11,6 +11,10 @@ from mutagen.id3 import ID3
 
 FLAGS = None
 
+f = open("youtube_api_key.txt", "r")
+youtube_api_key = f.readline()
+f.close()
+
 def getID3Tag(mp3_path):
   audio_file = MP3(mp3_path, ID3=ID3)
   return audio_file.tags
@@ -45,7 +49,7 @@ def repair_music():
   # search for youtube
   query =  '{} audio'.format(audio_name)
   debug.log('Looking for youtube by the query \'{}\''.format(query))
-  list = ye.find_youtube_detailed_by_api(query)
+  list = ye.find_youtube_detailed_by_api(query, youtube_api_key)
 
   count = 0
   for link in list:

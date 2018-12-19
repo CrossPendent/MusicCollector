@@ -14,6 +14,10 @@ import requests
 from mutagen.mp3 import MP3
 from mutagen.id3 import ID3, APIC, USLT, TOPE, TIT1, TIT2, TPE1, TIPL, TPRO, TCON, TPUB, TDOR, TDRL, TALB
 
+f = open("youtube_api_key.txt", "r")
+youtube_api_key = f.readline()
+f.close()
+
 def convertQueryToFilename(strQuery):
   listTargetKeys = ['\"', '#', '$', '%', '\'', '*', ',', '.', '/', ':', '"',
                     ';', '<', '>', '?', '\\', '^', '|', '~', '\\\\']
@@ -65,14 +69,14 @@ def find_youtube(query):
 
   return watch_urls
 
-def find_youtube_detailed_by_api(query):
+def find_youtube_detailed_by_api(query, youtube_api_key):
   url_list, videoId_list = find_youtube_by_api(query)
   # debug.log(url_list)
   watch_list = []
 
   base_url = "https://www.googleapis.com/youtube/v3/videos?"
   for videoId in videoId_list:
-    req_url = base_url + "id=" + videoId + "&key=AIzaSyD6YBCVQ3KlkCLDlU85b6H1LNv9fT3vH-o&part=snippet,contentDetails"
+    req_url = base_url + "id=" + videoId + "&key=" + youtube_api_key + "&part=snippet,contentDetails"
     json_string = requests.get(req_url).text
     data = json.loads(json_string)
     # debug.log(data['items'][0]['snippet']['title'] + ' ' + data['items'][0]['contentDetails']['duration'])
@@ -83,9 +87,9 @@ def find_youtube_detailed_by_api(query):
     watch_list.append(record)
   return watch_list
 
-def find_youtube_by_api(query):
+def find_youtube_by_api(query, youtube_api_key):
   base_url = "https://www.googleapis.com/youtube/v3/search?"
-  req_url = base_url + "part=snippet&q=" + urllib.parse.quote(query) + "&key=AIzaSyD6YBCVQ3KlkCLDlU85b6H1LNv9fT3vH-o&maxResults=10"
+  req_url = base_url + "part=snippet&q=" + urllib.parse.quote(query) + "&key=" + youtube_api_key + "&maxResults=10"
   debug.log(req_url)
   json_string = requests.get(req_url).text
   # debug.log(json_string)
@@ -253,11 +257,11 @@ def getSongFromYouTube(artist, title, songID, lyric, albumID, baseMusicDir, base
       isSkip = True
   if not isSkip:
     debug.log('Looking for youtube by the query \'{}\'...'.format(query))
-    list = find_youtube_by_api(query)
+    list = find_youtube_by_api(query, youtube_api_key)
     retry = 0
     while len(list) <= 1 and retry < 5:
       debug.log('Youtube list couldn\'t be gotten. retry...')
-      list = find_youtube_by_api(query)
+      list = find_youtube_by_api(query, youtube_api_key)
       retry += 1
     debug.log('trying to download \'' + query + '\'...')
 
