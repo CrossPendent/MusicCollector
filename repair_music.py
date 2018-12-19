@@ -11,10 +11,6 @@ from mutagen.id3 import ID3
 
 FLAGS = None
 
-f = open("youtube_api_key.txt", "r")
-youtube_api_key = f.readline()
-f.close()
-
 def getID3Tag(mp3_path):
   audio_file = MP3(mp3_path, ID3=ID3)
   return audio_file.tags
@@ -28,6 +24,10 @@ def getAudioNameFromID3(id3_tag):
   return '{}-{}'.format(id3_tag['TPE1'].text[0], id3_tag['TIT2'].text[0])
 
 def repair_music():
+  f = open("youtube_api_key.txt", "r")
+  youtube_api_key = f.readline()
+  f.close()
+
   filename = FLAGS.path.split(os.sep)[-1]
   target_dir = FLAGS.path.replace(os.sep+filename, '')
 

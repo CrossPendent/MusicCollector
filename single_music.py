@@ -14,12 +14,12 @@ else:
   IMAGE_DIR = 'temp/melon_cover_img'
   MUSIC_FILE_DIR = '/volume1/music/melon_chart'
 
-f = open("youtube_api_key.txt", "r")
-youtube_api_key = f.readline()
-print(youtube_api_key)
-f.close()
-
 def main():
+  f = open("youtube_api_key.txt", "r")
+  youtube_api_key = f.readline()
+  print(youtube_api_key)
+  f.close()
+
   if FLAGS.singer == None:
     artist = input('please input singer name: ')
   else:
