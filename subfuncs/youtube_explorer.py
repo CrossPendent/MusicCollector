@@ -253,11 +253,11 @@ def getSongFromYouTube(artist, title, songID, lyric, albumID, baseMusicDir, base
       isSkip = True
   if not isSkip:
     debug.log('Looking for youtube by the query \'{}\'...'.format(query))
-    list = find_youtube_by_api(query, youtube_api_key)
+    list, _ = find_youtube_by_api(query, youtube_api_key)
     retry = 0
     while len(list) <= 1 and retry < 5:
       debug.log('Youtube list couldn\'t be gotten. retry...')
-      list = find_youtube_by_api(query, youtube_api_key)
+      list, _ = find_youtube_by_api(query, youtube_api_key)
       retry += 1
     debug.log('trying to download \'' + query + '\'...')
 
