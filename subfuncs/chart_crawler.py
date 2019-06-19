@@ -17,7 +17,7 @@ def downloadImageFromMelon(url, songID):
   return file_name
 
 def getSongInfobySongIDOfMelon(melon_songID):
-  base_url = 'http://www.melon.com/song/detail.htm?songId='
+  base_url = 'http://www.melon.com/song/lyrics.htm?songId='
   url = base_url + melon_songID;
 
   content = http.getHTMLDocument(url)
