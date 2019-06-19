@@ -222,7 +222,7 @@ def convertMP3(baseDIR, old_filename, new_filename):
   mp3_path = os.path.join(baseDIR, new_filename)
   old_path = os.path.join(baseDIR, old_filename)
   if not os.path.exists(mp3_path):
-    ret = subprocess.call(['ffmpeg', '-i', old_path, mp3_path])
+    ret = subprocess.call([u'ffmpeg', '-i', old_path, mp3_path])
     if ret == 0:
       os.remove(old_path)
 
