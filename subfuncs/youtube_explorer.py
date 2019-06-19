@@ -274,7 +274,11 @@ def getSongFromYouTube(artist, title, songID, lyric, albumID, baseMusicDir, base
   return mp3_path
 
 if __name__ == '__main__':
-  print(find_youtube_detailed_by_api('MINO (송민호) - 아낙네 audio'))
+  f = open("../youtube_api_key.txt", "r")
+  youtube_api_key = f.readline().split()[0]
+  f.close()
+
+  print(find_youtube_detailed_by_api('MINO (송민호) - 아낙네 audio', youtube_api_key))
   # print(download_audio_from_youtube('https://www.youtube.co.kr/watch?v=a7Kl_A6Hce8', './', '볼빨간사춘기-여행', None))
   lyric = u'''
   abc
