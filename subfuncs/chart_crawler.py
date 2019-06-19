@@ -29,7 +29,7 @@ def getSongInfobySongIDOfMelon(melon_songID):
   lyric = ''
   if lyric_soup != None:
     raw_lyric = lyric_soup.contents[1:]
-    raw_lyric[0] = raw_lyric[0].replace('\r\n\t\t\t\t\t\t\t\t', '')
+    raw_lyric[0] = raw_lyric[0].replace('\r\n', '').replace('\t', '')
     for line in raw_lyric:
       if str(line) == '<br/>':
         lyric = lyric + '\r\n'
