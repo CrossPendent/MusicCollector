@@ -125,7 +125,7 @@ def download_audio_from_youtube(url, output_dir, strQuery, music_reporter):
     if stream.mime_type.find('mp4') >= 0:
       stream.download(output_dir, filename)
       break;
-  return (filename + '.mp4')
+  return filename
 
 def setID3(baseDIR, filename, artist, title, lyric, albumID, cover_img_path):
   file_path = os.path.join(baseDIR, filename)
